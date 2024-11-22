@@ -1,0 +1,35 @@
+.offcanvas-top.custom-offcanvas {
+  top: 56px; /* Navbar height */
+  /* border-top: 1px solid #dee2e6;  */
+  /* z-index: 1040;  */
+  /* padding:40px ; */
+  
+}
+
+.offcanvas {
+  background-color: #f8f9fa; /* Light background */
+  border-bottom: 2px solid #ddd; /* Add a border at the bottom */
+  /* padding:40px ; */
+  width: 98%;
+  margin: 10px;
+  text-align: center; 
+}
+
+.list-group-item a {
+  color: black; /* Link color */
+  text-decoration: none;
+}
+
+.list-group-item a:hover {
+  text-decoration: underline;
+}
+
+.dropdown .btn {
+  padding-left: 0; /* Remove extra padding */
+  margin-left: 10px; /* Add space from other navbar items */
+}
+
+.dropdown-menu {
+  padding-top: 20px;
+  min-width: 200px; /* Set a custom width if necessary */
+}
