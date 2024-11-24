@@ -15,7 +15,7 @@ const Navbar = () => {
   return (
     <>
       {/* Navbar */}
-      <nav className="navbar navbar-expand-lg bg-body-tertiary">
+      <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top ">
         <div className="container-fluid">
           {/* Brand */}
           <a className="navbar-brand" href="/">
@@ -26,7 +26,7 @@ const Navbar = () => {
               height="28"
               className="d-inline-block align-text-top"
             />
-            <span>Electro</span>
+            <span className="electro">MyDevice</span>
           </a>
 
           {/* Navbar Toggler */}
@@ -94,6 +94,11 @@ const Navbar = () => {
                 </a>
               </li>
               <li>
+                <a className="dropdown-item" href="/product-form">
+                  Sell product
+                </a>
+              </li>
+              <li>
                 <a className="dropdown-item" href="#">
                   Settings
                 </a>
@@ -142,4 +147,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

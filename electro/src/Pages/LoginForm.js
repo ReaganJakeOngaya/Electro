@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './LoginForm.css';
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +40,6 @@ const LoginForm = () => {
       [name]: value,
     }));
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -70,76 +70,65 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="card mx-auto" style={{ maxWidth: '400px' }}>
-        <div className="card-body">
-          <h3 className="card-title text-center">Sign in to your account</h3>
-          <p className="mt-2 text-center">
-            Or{' '}
-            <a href="/register" className="text-primary text-decoration-none">
-              create a new account
-            </a>
-          </p>
+    <div className="login-container">
+      <div className="login-card">
+        <h3 className="text-center">Sign in to your account</h3>
+        <p className="text-center">
+          Or{' '}
+          <a href="/register" className="login-link">
+            create a new account
+          </a>
+        </p>
 
-          {loginError && (
-            <div className="alert alert-danger" role="alert">
-              {loginError}
-            </div>
-          )}
+        {loginError && (
+          <div className="login-error">
+            {loginError}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-              {errors.email && (
-                <div className="invalid-feedback">{errors.email}</div>
-              )}
-            </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+            {errors.email && (
+              <div className="invalid-feedback">{errors.email}</div>
+            )}
+          </div>
 
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-              {errors.password && (
-                <div className="invalid-feedback">{errors.password}</div>
-              )}
-            </div>
+          <div className="form-group">
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            {errors.password && (
+              <div className="invalid-feedback">{errors.password}</div>
+            )}
+          </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn btn-primary w-100"
-            >
-              {isLoading ? (
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              ) : (
-                'Sign in'
-              )}
-            </button>
-          </form>
-        </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="btn login-btn"
+          >
+            {isLoading ? 'Signing in...' : 'Sign in'}
+          </button>
+        </form>
       </div>
     </div>
   );
 };
 
 export default LoginForm;
+

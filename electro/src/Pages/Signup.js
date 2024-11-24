@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import './Signup.css';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    // username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -23,9 +23,6 @@ const Signup = () => {
     if (!formData.lastName.trim()) {
       newErrors.lastName = 'Last name is required';
     }
-    // if (!formData.username.trim()) {
-    //   newErrors.username = 'Username is required';
-    // }
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -73,118 +70,77 @@ const Signup = () => {
   };
 
   return (
-    <div className="container mt-5" >
-      <div className="card mx-auto" style={{ maxWidth: '500px' }}>
-        <div className="card-body">
-          <h2 className="card-title text-center">Create your account</h2>
-          <p className="text-center">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary">
-              Sign in
-            </Link>
-          </p>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="firstName" className="form-label">
-                First Name
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
-                value={formData.firstName}
-                onChange={handleChange}
-              />
-              {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="lastName" className="form-label">
-                Last Name
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
-                value={formData.lastName}
-                onChange={handleChange}
-              />
-              {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
-            </div>
-
-            {/* <div className="mb-3">
-              <label htmlFor="username" className="form-label">
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                value={formData.username}
-                onChange={handleChange}
-              />
-              {errors.username && <div className="invalid-feedback">{errors.username}</div>}
-            </div> */}
-
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                value={formData.email}
-                onChange={handleChange}
-              />
-              {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                value={formData.password}
-                onChange={handleChange}
-              />
-              {errors.password && <div className="invalid-feedback">{errors.password}</div>}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="confirmPassword" className="form-label">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-              {errors.confirmPassword && (
-                <div className="invalid-feedback">{errors.confirmPassword}</div>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              className={`btn btn-primary w-100 ${isLoading ? 'disabled' : ''}`}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Creating account...' : 'Create account'}
-            </button>
-          </form>
-        </div>
+    <div className="signup-container">
+      <div className="signup-card">
+        <h2 className=" account-form text-center">Create Your Account</h2>
+        <p className="text-center">
+          Already have an account?{' '}
+          <Link to="/login" className="signup-link">
+            Sign in
+          </Link>
+        </p>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <input
+              type="text"
+              name="firstName"
+              placeholder="First Name"
+              className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
+              value={formData.firstName}
+              onChange={handleChange}
+            />
+            {errors.firstName && <div className="invalid-feedback">{errors.firstName}</div>}
+          </div>
+          <div className="form-group">
+            <input
+              type="text"
+              name="lastName"
+              placeholder="Last Name"
+              className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
+              value={formData.lastName}
+              onChange={handleChange}
+            />
+            {errors.lastName && <div className="invalid-feedback">{errors.lastName}</div>}
+          </div>
+          <div className="form-group">
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+              value={formData.email}
+              onChange={handleChange}
+            />
+            {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+          </div>
+          <div className="form-group">
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+              value={formData.password}
+              onChange={handleChange}
+            />
+            {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+          </div>
+          <div className="form-group">
+            <input
+              type="password"
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+            {errors.confirmPassword && (
+              <div className="invalid-feedback">{errors.confirmPassword}</div>
+            )}
+          </div>
+          <button type="submit" className="btn signup-btn" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Create Account'}
+          </button>
+        </form>
       </div>
     </div>
   );

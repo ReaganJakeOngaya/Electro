@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import './AccountManagement.css';
+import Navbar from "../Components/Navbar";
 
 const AccountManagement = () => {
   const [user, setUser] = useState(null); // Store the user object
@@ -56,32 +57,43 @@ const AccountManagement = () => {
   };
 
   return (
-    <div className="account-management">
-      <div className="container">
-        {/* Profile Section */}
-        {user ? (
-          <section className="profile">
-            <h2>Profile</h2>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>First Name:</strong> {user.first_name}</p>
-            <p><strong>Last Name:</strong> {user.last_name}</p>
-          </section>
-        ) : (
-          <p>Loading user data...</p>
-        )}
-      </div>
-
-      <h2>Account Management</h2>
-      <div className="buttons">
-        <button onClick={handleDeleteAccount} className="btn-delete">
-          Request Account Deletion
-        </button>
-        <button onClick={handleRecoverAccount} className="btn-recover">
-          Recover Account
-        </button>
-      </div>
-      {message && <p className="message">{message}</p>}
+    <div className="account-management container d-flex flex-column justify-content-center align-items-center  bg-light rounded shadow">
+      <Navbar />
+  <h2 className="text-primary mb-4">Profile</h2>
+  <div className="user d-flex flex-column align-items-center text-center">
+    <div className="user-pic mb-3">
+      <img
+        className="img-user rounded-circle border border-primary shadow"
+        src="https://img.icons8.com/?size=100&id=MstlsvKUSlqA&format=png&color=000000"
+        alt="user-photo"
+      />
     </div>
+    <div className="profile">
+      {user ? (
+        <>
+          <p><strong>First Name:</strong> {user.first_name}</p>
+          <p><strong>Last Name:</strong> {user.last_name}</p>
+          <p><strong>Email:</strong> {user.email}</p>
+        </>
+      ) : (
+        <p>Loading user data...</p>
+      )}
+    </div>
+  </div>
+
+  <h2 className="text-danger mt-5">Account Management</h2>
+  <div className="buttons mt-4">
+    <button onClick={handleDeleteAccount} className="btn btn-danger mx-2">
+      Request Account Deletion
+    </button>
+    <button onClick={handleRecoverAccount} className="btn btn-success mx-2">
+      Recover Account
+    </button>
+  </div>
+  {message && <p className="message text-info mt-3">{message}</p>}
+</div>
+
+
   );
 };
 

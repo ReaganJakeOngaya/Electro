@@ -1,10 +1,164 @@
-.home{
-    background: rgb(255,255,255);
-    background: linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(146,170,198,1) 100%);
+body {
+  margin: 0;
+  font-family: 'Arial', sans-serif;
+  background-color: #ffffff;
+  color: #000000;
 }
 
-h1{
-    color: #24538a;
-    font-family: Cursive;
+.display-1{
+    color: #000000;
+    font-family: Monospace;
+    font-weight: bolder ;
+    font-size: 300px;
+    line-height: 0.65;
+}
+.lead {
+    padding-top: 20px;
+    font-weight: 300;
+    font-size: 30px;
+    color: green;
+} 
+
+.landing-page {
+  scroll-behavior: smooth;
 }
 
+/* Header Section */
+.header-section {
+  height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 2s ease-in-out;
+  gap: 40px;
+}
+
+/* Sections */
+.section {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+  opacity: 0;
+  transform: translateY(50px);
+}
+
+.all-rights{
+    width: 550px;
+    
+}
+
+.section-one {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.section-two {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.section-three {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+/* Footer */
+.footer {
+  padding: 20px 0;
+  background-color: #ffffff;
+  border-top: 1px solid #000000;
+}
+
+/* Scroll Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Triggered on Scroll */
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Buttons.css */
+button {
+  background-color: #000000; /* Blue background */
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  margin: 0.5rem;
+  border-radius: 1px ; /* Rounded corners */
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button a {
+  text-decoration: none; /* Remove underline */
+  color: inherit; /* Use button's text color */
+}
+
+button:hover {
+  background-color: #000000; /* Darker blue on hover */
+  transform: scale(1.05); /* Slight zoom effect */
+}
+
+button:active {
+  transform: scale(0.95); /* Pressed effect */
+  background-color: #323335; /* Even darker blue */
+}
+
+.image-container {
+  position: relative;
+  display: inline-block; /* To make the container size match the image */
+  width: 100%; /* Adjust to your needs */
+  max-width: 600px; /* Optional: Limit the container width */
+}
+
+.background-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 0.5rem; /* Optional: Rounded corners for the image */
+}
+
+.button-container {
+  position: absolute;
+  padding-top: 500px;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust position to center */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* Space between buttons */
+}
+
+
+button a {
+  text-decoration: none; /* Remove underline */
+  color: inherit; /* Inherit button text color */
+}
+
+button:hover {
+  border: 1px solid rgb(0, 26, 255);
+  background-color: green;
+  transform: scale(1.05); /* Slight zoom effect */
+}
+
+button:active {
+  transform: scale(0.95); /* Pressed effect */
+  background-color: #2C5A8A; /* Even darker blue */
+}

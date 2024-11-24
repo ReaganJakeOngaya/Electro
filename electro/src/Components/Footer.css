@@ -1,0 +1,40 @@
+.playful-footer {
+  /* background: linear-gradient(45deg, #292828, #525050); */
+  color: white;
+}
+
+.footer-logo {
+  font-size: 2rem;
+  font-weight: bold;
+  /* text-transform: uppercase; */
+  color: #413f3f;
+  text-shadow: 2px 2px #dab641;
+}
+
+.social-icons a {
+  font-size: 1rem;
+  /* color: white; */
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-icons a:hover {
+  /* color: #d35d6e; */
+  transform: scale(1.2);
+}
+
+.footer-links a {
+  color: #020202;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #dab641;
+}
+
+.footer-bottom {
+  font-size: 0.9rem;
+  margin-top: 15px;
+  color: #020202;
+}

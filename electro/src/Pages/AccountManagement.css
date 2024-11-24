@@ -1,50 +1,53 @@
 .account-management {
-  max-width: 400px;
-  margin: 20px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-family: Arial, sans-serif;
-}
+    max-width: 900px;
+    /* margin: 30px auto; */
+    height: fit-content;
+    /* margin-top: 100px; */
+    padding: 40px;
+  }
 
-h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
+  .img-user {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+  }
 
-input {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+  .user-pic {
+    transition: transform 0.3s ease;
+  }
 
-.buttons {
-  display: flex;
-  justify-content: space-between;
-}
+  .user-pic:hover {
+    transform: scale(1.1);
+  }
 
-button {
-  flex: 1;
-  margin: 0 5px;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  color: #fff;
-}
+  .btn {
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 5px;
+    padding: 0.5rem 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
 
-.btn-delete {
-  background-color: #e74c3c;
-}
+  .btn:hover {
+    transform: translateY(-2px);
+  }
 
-.btn-recover {
-  background-color: #2ecc71;
-}
+  .btn-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+  }
 
-.message {
-  margin-top: 15px;
-  font-size: 14px;
-  text-align: center;
-}
+  .btn-success:hover {
+    background-color: #28a745;
+    color: #fff;
+  }
+
+  .message {
+    font-size: 1.2rem;
+    font-style: italic;
+  }
+
+  .text-primary{
+    padding-top: 50px;
+  }

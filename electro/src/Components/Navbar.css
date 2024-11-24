@@ -1,35 +1,80 @@
 .offcanvas-top.custom-offcanvas {
-  top: 56px; /* Navbar height */
-  /* border-top: 1px solid #dee2e6;  */
-  /* z-index: 1040;  */
-  /* padding:40px ; */
+  top: 56px; 
   
 }
 
+.nav-link{
+  font-size: 18px;
+  font-weight: 500;
+}
 .offcanvas {
-  background-color: #f8f9fa; /* Light background */
-  border-bottom: 2px solid #ddd; /* Add a border at the bottom */
-  /* padding:40px ; */
+  background-color: #f8f9fa; 
+  border-bottom: 2px solid #ddd;
   width: 98%;
   margin: 10px;
   text-align: center; 
 }
 
-.list-group-item a {
-  color: black; /* Link color */
-  text-decoration: none;
+
+
+/* Navbar */
+.navbar {
+  z-index: 1030; /* Ensure it stays above other content */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.list-group-item a:hover {
-  text-decoration: underline;
+.navbar-brand {
+  font-size: 1.25rem;
+  font-weight: bold;
+  /* text-transform: uppercase; */
 }
 
-.dropdown .btn {
-  padding-left: 0; /* Remove extra padding */
-  margin-left: 10px; /* Add space from other navbar items */
+.brand-name {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+}
+
+.navbar-nav .nav-link {
+  font-size: 1rem;
+  margin: 0 15px;
+  transition: color 0.3s ease-in-out;
+}
+
+.nav-link{
+  color: black;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #ffc107;
 }
 
 .dropdown-menu {
-  padding-top: 20px;
-  min-width: 200px; /* Set a custom width if necessary */
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background-color: #afaca4;
+  color: #080808;
+}
+
+.custom-offcanvas .list-group-item {
+  font-size: 1.1rem;
+  padding: 12px 15px;
+}
+
+.custom-offcanvas .list-group-item a {
+  text-decoration: none;
+  color: #000;
+  transition: color 0.3s;
+}
+
+.custom-offcanvas .list-group-item a:hover {
+  color: #007bff;
+}
+
+.electro{
+  font-weight: 800;
+  font-size: 25px;
+  padding-left: 10px;
 }
