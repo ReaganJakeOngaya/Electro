@@ -3,20 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { RiEyeLine, RiEyeCloseLine, RiArrowLeftLine } from 'react-icons/ri';
 
-/* ─────────────────────────────────────────────────────────────
-   Auth — DeviceYangu
-   Theme: Minimal 3D · Black / White / Gray
+import loginBanner from '../assets/loginbanner.jpg';
 
-   IMPORTANT: InputField, LoginForm, SignupForm, and
-   DecorativePanel are all defined OUTSIDE the Auth component.
-   Defining components inside a parent causes React to treat
-   them as new component types on every render, unmounting and
-   remounting the inputs — which drops focus and loses the cursor.
-───────────────────────────────────────────────────────────── */
-
-/* ══════════════════════════════════════════════════════════════
-   InputField
-══════════════════════════════════════════════════════════════ */
 const InputField = ({
   id, label, type, name, value, onChange, error,
   placeholder, autoComplete, toggleButton, onToggle, showPassword,
@@ -267,36 +255,31 @@ const SignupForm = ({
 );
 
 /* ══════════════════════════════════════════════════════════════
-   DecorativePanel
+   DecorativePanel – now with a background image + dark overlay
 ══════════════════════════════════════════════════════════════ */
 const DecorativePanel = ({ isLogin }) => (
-  <div className="relative hidden lg:flex lg:w-1/2 bg-black overflow-hidden">
+  <div className="relative hidden lg:flex lg:w-1/2 overflow-hidden">
+    {/* Background image */}
     <div
-      className="absolute inset-0 opacity-[0.05]"
-      style={{
-        backgroundImage:
-          'linear-gradient(rgba(255,255,255,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.8) 1px, transparent 1px)',
-        backgroundSize: '40px 40px',
-      }}
+      className="absolute inset-0 bg-cover bg-center"
+      style={{ backgroundImage: `url(${loginBanner})` }}
     />
-    <div
-      className="absolute inset-0"
-      style={{ background: 'radial-gradient(ellipse 80% 70% at 40% 50%, #1a1a1a 0%, #000 100%)' }}
-    />
-    <div
-      className="absolute inset-0"
-      style={{ background: 'radial-gradient(ellipse 100% 100% at 50% 50%, transparent 30%, rgba(0,0,0,0.6) 100%)' }}
-    />
+    {/* Dark overlay to make text readable (fades the image into dark) */}
+    <div className="absolute inset-0 bg-black/60" />
+    {/* Optional gradient overlay to soften edges (left side darker) */}
+    <div className="absolute inset-0 bg-gradient-to-r from-black via-black/10 to-transparent" />
 
+    {/* Content container – same as before */}
     <div className="relative z-10 flex flex-col justify-between p-14 lg:p-16 w-full">
       <div className="flex items-center justify-between">
         <Link to="/" className="text-2xl font-black tracking-tighter">
-          <span className="text-white">Device</span>
-          <span className="text-zinc-500">Yangu</span>
+          <span className="text-white">Gad</span>
+          <span className="text-orange-600">&</span>
+          <span className="text-zinc-500">gets</span>
         </Link>
         <Link
           to="/"
-          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-white transition-colors"
+          className="flex items-center gap-1.5 text-xs font-semibold text-zinc-100 hover:text-black transition-colors"
         >
           <RiArrowLeftLine size={14} /> Back to store
         </Link>
@@ -305,14 +288,14 @@ const DecorativePanel = ({ isLogin }) => (
       <div className="space-y-5">
         <h2
           className="text-5xl lg:text-6xl font-black tracking-tighter text-white leading-[0.95]"
-          style={{ textShadow: '0 2px 40px rgba(255,255,255,0.06)' }}
+          style={{ textShadow: '0 2px 40px rgba(0,0,0,0.3)' }}
         >
           {isLogin
             ? <><span>Welcome</span><br /><span>back.</span></>
             : <><span>Smart</span><br /><span>shopping</span><br /><span>starts here.</span></>
           }
         </h2>
-        <p className="text-zinc-500 text-base leading-relaxed max-w-xs">
+        <p className="text-zinc-300 text-base leading-relaxed max-w-xs">
           {isLogin
             ? 'Sign in to access your account, track orders, and unlock exclusive deals.'
             : 'Get KSh 500 off your first order, early access to deals, and loyalty rewards.'
@@ -322,13 +305,13 @@ const DecorativePanel = ({ isLogin }) => (
 
       <div className="flex flex-wrap gap-2">
         {(isLogin
-          ? ['📦 50,000+ orders delivered', '⚡ Same-day shipping', '🛡️ 2-Year warranty']
-          : ['🎁 KSh 500 off first order', '🔔 Early access to deals', '⭐ Loyalty rewards']
+          ? [' 50,000+ orders delivered', ' Same-day shipping', ' 1-Year warranty']
+          : [' KSh 500 off first order', ' Early access to deals', ' Loyalty rewards']
         ).map((pill) => (
           <div
             key={pill}
-            className="px-3.5 py-2 rounded-full text-xs font-semibold text-zinc-400 border border-zinc-800"
-            style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)' }}
+            className="px-3.5 py-2 rounded-full text-xs font-semibold text-zinc-300 border border-zinc-700"
+            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
           >
             {pill}
           </div>
@@ -465,47 +448,31 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row">
-
       <DecorativePanel isLogin={isLogin} />
-
       <div className="flex-1 flex items-center justify-center px-6 py-14 lg:px-12 bg-white">
         <div className="w-full max-w-sm">
-
-          {/* Mobile logo */}
           <div className="lg:hidden mb-8">
             <Link to="/" className="text-xl font-black tracking-tighter">
-              <span className="text-black">Device</span>
-              <span className="text-zinc-400">Yangu</span>
+              <span className="text-black">Gad</span>
+              <span className="text-orange-600">&</span>
+              <span className="text-zinc-500">gets</span>
             </Link>
           </div>
-
-          {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-black tracking-tighter text-black">
               {isLogin ? 'Sign in' : 'Create account'}
             </h1>
             <p className="text-sm text-zinc-400 mt-1.5 font-medium">
-              {isLogin ? 'Access your DeviceYangu account' : 'Start shopping smarter today'}
+              {isLogin ? 'Access your Gad&gets account' : 'Start shopping smarter today'}
             </p>
           </div>
-
-          {/* Error banner */}
           {error && (
-            <div
-              className="mb-6 px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50
-                         text-sm text-zinc-700 flex items-start gap-2"
-              style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.04)' }}
-            >
+            <div className="mb-6 px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50 text-sm text-zinc-700 flex items-start gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-zinc-700 flex-shrink-0 mt-1" />
               {error}
             </div>
           )}
-
-          {/* Toggle tabs */}
-          <div
-            className="flex mb-8 p-1 rounded-xl bg-zinc-100 border border-zinc-200"
-            style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}
-          >
+          <div className="flex mb-8 p-1 rounded-xl bg-zinc-100 border border-zinc-200">
             {['Sign in', 'Register'].map((label, i) => {
               const active = isLogin ? i === 0 : i === 1;
               return (
@@ -513,22 +480,15 @@ const Auth = () => {
                   key={label}
                   type="button"
                   onClick={() => { if (!active) toggleForm(); }}
-                  className={`
-                    flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-150
-                    ${active ? 'bg-black text-white shadow-sm' : 'text-zinc-500 hover:text-black'}
-                  `}
+                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all duration-150
+                              ${active ? 'bg-black text-white shadow-sm' : 'text-zinc-500 hover:text-black'}`}
                 >
                   {label}
                 </button>
               );
             })}
           </div>
-
-          {/* key prop here is intentional: only remounts on tab switch, never on keystrokes */}
-          <div
-            key={isLogin ? 'login' : 'signup'}
-            style={{ animation: 'authFormIn 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) both' }}
-          >
+          <div key={isLogin ? 'login' : 'signup'} style={{ animation: 'authFormIn 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) both' }}>
             {isLogin ? (
               <LoginForm
                 loginData={loginData}
@@ -556,16 +516,14 @@ const Auth = () => {
               />
             )}
           </div>
-
           <p className="mt-7 text-center text-xs text-zinc-400">
-            By continuing you agree to DeviceYangu's{' '}
+            By continuing you agree to Gad&gets's{' '}
             <Link to="/terms" className="text-black font-semibold hover:underline">Terms</Link>
             {' '}and{' '}
             <Link to="/privacy" className="text-black font-semibold hover:underline">Privacy Policy</Link>.
           </p>
         </div>
       </div>
-
       <style>{`
         @keyframes authFormIn {
           from { opacity: 0; transform: translateY(10px); }

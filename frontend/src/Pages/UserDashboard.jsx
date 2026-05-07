@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API } from '../Components/common/constants';
@@ -17,7 +17,9 @@ import DealsView from '../Components/views/DealsView';
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const user     = getUser();
+  const basicUser = getUser();              // minimal user from localStorage after login
+  const [userState, setUserState] = useState(basicUser);
+  const hasFetchedProfile = useRef(false);   // prevent multiple initial fetches
 
   const [products, setProducts]           = useState([]);
   const [loading, setLoading]             = useState(true);
@@ -40,10 +42,10 @@ const UserDashboard = () => {
 
   /* Auth guard */
   useEffect(() => {
-    if (!user || !getToken()) navigate('/auth');
-  }, [user, navigate]);
+    if (!basicUser || !getToken()) navigate('/auth');
+  }, [basicUser, navigate]);
 
-  /* Fetch products */
+  /* Fetch all products */
   useEffect(() => {
     axios.get(`${API}/products`)
       .then((r) => setProducts(r.data))
@@ -51,30 +53,70 @@ const UserDashboard = () => {
       .finally(() => setLoading(false));
   }, []);
 
-const handleAddToCart = useCallback((product) => {
-  // Calculate discounted price if product has discount
-  let finalPrice = product.price;
-  if (product.discount && product.discount > 0) {
-    finalPrice = product.price * (1 - product.discount / 100);
-  }
-  // Create cart item with original price and discount for display
-  const cartItem = {
-    ...product,
-    originalPrice: product.price,
-    price: finalPrice,
-    discount: product.discount || 0,
-    qty: 1,
-  };
-  setCart((prev) => {
-    const exists = prev.find((i) => i.id === product.id);
-    if (exists) {
-      return prev.map((i) =>
-        i.id === product.id ? { ...i, qty: i.qty + 1 } : i
-      );
+  /* 🟢 Fetch full user profile exactly once on mount */
+  useEffect(() => {
+    if (hasFetchedProfile.current) return;
+    hasFetchedProfile.current = true;
+
+    const token = getToken();
+    const userId = basicUser?.id;
+    if (!token || !userId) return;
+
+    axios.get(`${API}/user?user_id=${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => {
+        const fullUser = res.data;
+        setUserState(fullUser);
+        localStorage.setItem('user', JSON.stringify(fullUser));
+      })
+      .catch(err => {
+        console.error('Failed to fetch full user profile', err);
+        setUserState(basicUser);
+      });
+  }, [basicUser]); // runs once because basicUser is stable
+
+  /* 🟢 Manual refresh – call this after profile updates (avatar, address, etc.) */
+  const refreshUser = useCallback(async () => {
+    const token = getToken();
+    const userId = basicUser?.id;
+    if (!token || !userId) return;
+
+    try {
+      const res = await axios.get(`${API}/user?user_id=${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const fullUser = res.data;
+      setUserState(fullUser);
+      localStorage.setItem('user', JSON.stringify(fullUser));
+    } catch (err) {
+      console.error('Failed to refresh user profile', err);
     }
-    return [...prev, cartItem];
-  });
-}, []);
+  }, [basicUser]);
+
+  /* Cart & discount logic */
+  const handleAddToCart = useCallback((product) => {
+    let finalPrice = product.price;
+    if (product.discount && product.discount > 0) {
+      finalPrice = product.price * (1 - product.discount / 100);
+    }
+    const cartItem = {
+      ...product,
+      originalPrice: product.price,
+      price: finalPrice,
+      discount: product.discount || 0,
+      qty: 1,
+    };
+    setCart((prev) => {
+      const exists = prev.find((i) => i.id === product.id);
+      if (exists) {
+        return prev.map((i) =>
+          i.id === product.id ? { ...i, qty: i.qty + 1 } : i
+        );
+      }
+      return [...prev, cartItem];
+    });
+  }, []);
 
   const handleCheckout = () => {
     setCartOpen(false);
@@ -82,9 +124,9 @@ const handleAddToCart = useCallback((product) => {
   };
 
   const handleOrderSuccess = () => {
-    setCart([]);          // clear cart
+    setCart([]);
     setCheckoutActive(false);
-    setActiveNav('home'); // go to home view
+    setActiveNav('home');
   };
 
   const handleUpdateQty = useCallback((id, qty) => {
@@ -96,7 +138,6 @@ const handleAddToCart = useCallback((product) => {
     setCart((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
-  /* Wishlist */
   const handleToggleWishlist = useCallback((id) => {
     setWishlist((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]);
   }, []);
@@ -119,6 +160,7 @@ const handleAddToCart = useCallback((product) => {
         </div>
       </div>
     );
+
     if (checkoutActive) {
       return (
         <CheckoutView
@@ -131,13 +173,13 @@ const handleAddToCart = useCallback((product) => {
 
     switch (activeNav) {
       case 'home':
-        return <HomeView user={user} products={products} onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlist={wishlist} onNavChange={setActiveNav} onCategoryChange={setActiveCategory} />;
+        return <HomeView user={userState} products={products} onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlist={wishlist} onNavChange={setActiveNav} onCategoryChange={setActiveCategory} />;
       case 'products':
         return <ProductsView products={products} onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlist={wishlist} onProductClick={setSelectedProduct} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />;
       case 'wishlist':
         return <WishlistView products={products} wishlist={wishlist} onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} />;
       case 'account':
-        return <AccountView user={user} onLogout={handleLogout} />;
+        return <AccountView user={userState} onLogout={handleLogout} onUserUpdate={refreshUser} />;
       case 'orders':
         return <OrderHistoryView />;
       case 'deals':
@@ -156,7 +198,7 @@ const handleAddToCart = useCallback((product) => {
           onCategoryChange={setActiveCategory}
           activeNav={activeNav}
           onNavChange={setActiveNav}
-          user={user}
+          user={userState}
           cartCount={cartCount}
           onCartOpen={() => setCartOpen(true)}
           onLogout={handleLogout}
@@ -164,7 +206,6 @@ const handleAddToCart = useCallback((product) => {
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          {/* Mobile nav */}
           <MobileNav
             activeNav={activeNav}
             onNavChange={setActiveNav}
@@ -172,20 +213,17 @@ const handleAddToCart = useCallback((product) => {
             onCartOpen={() => setCartOpen(true)}
             mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen}
-            user={user}
+            user={userState}
             onLogout={handleLogout}
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
           />
-
-          {/* Page content */}
           <main className="px-4 lg:px-8 py-6 pb-24 lg:pb-8">
             {renderView()}
           </main>
         </div>
       </div>
 
-      {/* Cart drawer */}
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}
@@ -195,7 +233,6 @@ const handleAddToCart = useCallback((product) => {
         onCheckout={handleCheckout}
       />
 
-      {/* Product modal */}
       <ProductModal
         product={selectedProduct}
         onClose={() => setSelectedProduct(null)}

@@ -6,8 +6,9 @@ import Account from './Pages/Auth';
 import UserDashboard from './Pages/UserDashboard';
 import AdminDashboard from './Pages/AdminDashboard';
 import NotFound from './Pages/NotFound';
-import { getUser, getToken, isAdmin } from './Components/common/utils/auth';
+import { getUser, getToken } from './Components/common/utils/auth';
 import AboutUs from './Pages/AboutUs';
+import Support from './Pages/Support';
 
 // Protected route wrapper
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Account />} />
           <Route path="/aboutus" element={<AboutUs />} />
+          <Route path="/support" element={<Support />} />
           <Route
             path="/user-dashboard"
             element={

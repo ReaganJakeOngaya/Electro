@@ -45,10 +45,19 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onP
           </div>
         )}
 
-        {/* Discount badge */}
+        {/* Category badge - top left */}
+        <div className="absolute top-2 left-2 z-10">
+          <span className="text-[8px] font-black uppercase tracking-[0.1em] bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-500 px-1.5 py-0.5 rounded-full">
+            {product.category}
+          </span>
+        </div>
+
+        {/* Discount badge - top right, improved visibility */}
         {hasDiscount && (
-          <div className="absolute top-2 left-2 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full z-10">
-            -{product.discount}%
+          <div className="absolute top-2 right-2 z-10">
+            <span className="bg-red-600 text-white text-[11px] font-black px-2 py-0.5 rounded-full shadow-md">
+              -{product.discount}%
+            </span>
           </div>
         )}
 
@@ -64,13 +73,6 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onP
             ))}
           </div>
         )}
-
-        {/* Category badge */}
-        <div className="absolute top-2 left-2">
-          <span className="text-[8px] font-black uppercase tracking-[0.1em] bg-white/90 backdrop-blur-sm border border-zinc-200 text-zinc-500 px-1.5 py-0.5 rounded-full">
-            {product.category}
-          </span>
-        </div>
 
         {/* Quick View overlay */}
         {hovered && (
@@ -112,7 +114,7 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onP
             )}
           </div>
 
-          {/* Action buttons */}
+          {/* Action buttons - wishlist next to add */}
           <div className="flex items-center gap-1.5">
             <button
               onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}

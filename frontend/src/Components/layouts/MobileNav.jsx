@@ -14,8 +14,9 @@ const MobileNav = ({ activeNav, onNavChange, cartCount, onCartOpen, mobileMenuOp
     {/* Top bar */}
     <header className="lg:hidden sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-zinc-100 px-4 h-14 flex items-center justify-between">
       <Link to="/" className="text-lg font-black tracking-tighter">
-        <span className="text-black">Device</span>
-        <span className="text-zinc-400">Yangu</span>
+        <span className="text-black">Gad</span>
+        <span className="text-orange-600">&</span>
+        <span className="text-zinc-500">gets</span>
       </Link>
       <div className="flex items-center gap-2">
         <button
