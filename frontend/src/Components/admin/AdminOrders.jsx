@@ -4,13 +4,33 @@ import axios from 'axios';
 import { API } from '../common/constants';
 import { getToken } from '../common/utils/auth';
 import OrderDetailsModal from './OrderDetailsModal';
+import { RiSearchLine, RiCloseLine, RiFilterLine } from 'react-icons/ri';
 
-const STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+const STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'all'];
 
 const AdminOrders = ({ orders, onRefresh }) => {
   const [updating, setUpdating] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [filteredOrders, setFilteredOrders] = useState(orders);
+
+  React.useEffect(() => {
+    let result = [...orders];
+    if (statusFilter !== 'all') {
+      result = result.filter(o => o.status === statusFilter);
+    }
+    if (search.trim() !== '') {
+      const term = search.toLowerCase();
+      result = result.filter(o =>
+        o.order_number.toLowerCase().includes(term) ||
+        `${o.customer.firstName} ${o.customer.lastName}`.toLowerCase().includes(term) ||
+        o.customer.email.toLowerCase().includes(term)
+      );
+    }
+    setFilteredOrders(result);
+  }, [statusFilter, search, orders]);
 
   const updateStatus = async (orderId, newStatus) => {
     setUpdating(orderId);
@@ -48,6 +68,34 @@ const AdminOrders = ({ orders, onRefresh }) => {
         <h1 className="text-2xl font-black tracking-tighter text-black">Orders</h1>
         <p className="text-sm text-zinc-500 mt-1">Manage customer orders</p>
       </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
+        <div className="relative flex-1">
+          <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+          <input
+            type="text"
+            placeholder="Search by order # or customer..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full pl-9 pr-8 py-2 text-sm border border-zinc-200 rounded-xl bg-white focus:outline-none focus:border-black"
+          />
+          {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black"><RiCloseLine size={14} /></button>}
+        </div>
+        <div className="flex items-center gap-2">
+          <RiFilterLine size={14} className="text-zinc-400" />
+          <select
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+            className="px-3 py-2 text-sm border border-zinc-200 rounded-xl bg-white focus:outline-none focus:border-black"
+          >
+            {STATUS_OPTIONS.map(s => (
+              <option key={s} value={s}>{s === 'all' ? 'All statuses' : s}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -62,7 +110,7 @@ const AdminOrders = ({ orders, onRefresh }) => {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {filteredOrders.map((order) => (
                 <tr key={order.id} className="border-b border-zinc-100 hover:bg-zinc-50/50">
                   <td className="px-6 py-4 font-mono text-sm">#{order.order_number}</td>
                   <td className="px-6 py-4">{order.customer.firstName} {order.customer.lastName}</td>
@@ -81,7 +129,7 @@ const AdminOrders = ({ orders, onRefresh }) => {
                         disabled={updating === order.id}
                         className="text-xs border rounded-lg px-2 py-1 bg-white"
                       >
-                        {STATUS_OPTIONS.map(s => (
+                        {STATUS_OPTIONS.filter(s => s !== 'all').map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
                       </select>
@@ -95,12 +143,14 @@ const AdminOrders = ({ orders, onRefresh }) => {
                   </td>
                 </tr>
               ))}
+              {filteredOrders.length === 0 && (
+                <tr><td colSpan="6" className="px-6 py-12 text-center text-zinc-400">No orders found</td></tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Order Details Modal */}
       {showModal && selectedOrder && (
         <OrderDetailsModal order={selectedOrder} onClose={() => setShowModal(false)} />
       )}

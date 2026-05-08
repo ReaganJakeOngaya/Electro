@@ -1,12 +1,26 @@
 // src/components/admin/AdminUsers.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
-import {API} from '../common/constants/index';
+import { API } from '../common/constants';
 import { getToken } from '../common/utils/auth';
-import { RiAdminLine, RiUserLine, RiDeleteBinLine } from 'react-icons/ri';
+import { RiAdminLine, RiUserLine, RiDeleteBinLine, RiSearchLine, RiCloseLine } from 'react-icons/ri';
 
 const AdminUsers = ({ users, currentUserId, onRefresh }) => {
   const [updating, setUpdating] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState(users);
+
+  React.useEffect(() => {
+    if (search.trim() === '') {
+      setFilteredUsers(users);
+    } else {
+      const term = search.toLowerCase();
+      setFilteredUsers(users.filter(u =>
+        `${u.first_name} ${u.last_name}`.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term)
+      ));
+    }
+  }, [search, users]);
 
   const toggleAdmin = async (userId, currentAdminStatus) => {
     setUpdating(userId);
@@ -40,63 +54,81 @@ const AdminUsers = ({ users, currentUserId, onRefresh }) => {
         <h1 className="text-2xl font-black tracking-tighter text-black">Users</h1>
         <p className="text-sm text-zinc-500 mt-1">Manage registered customers</p>
       </div>
+
+      <div className="relative mb-5 max-w-sm">
+        <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
+        <input
+          type="text"
+          placeholder="Search by name or email..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="w-full pl-9 pr-8 py-2 text-sm border border-zinc-200 rounded-xl bg-white focus:outline-none focus:border-black"
+        />
+        {search && <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black"><RiCloseLine size={14} /></button>}
+      </div>
+
       <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-zinc-50 border-b border-zinc-100">
-            <tr>
-              <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">User</th>
-              <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">Email</th>
-              <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">Role</th>
-              <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">Joined</th>
-              <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="border-b border-zinc-100 hover:bg-zinc-50/50">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold">
-                      {user.first_name?.[0]}{user.last_name?.[0]}
-                    </div>
-                    <span>{user.first_name} {user.last_name}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">{user.email}</td>
-                <td className="px-6 py-4">
-                  {user.is_admin ? (
-                    <span className="text-xs font-bold bg-black text-white px-2 py-1 rounded-full">Admin</span>
-                  ) : (
-                    <span className="text-xs font-bold bg-zinc-100 text-zinc-700 px-2 py-1 rounded-full">Customer</span>
-                  )}
-                </td>
-                <td className="px-6 py-4 text-sm">{new Date(user.created_at).toLocaleDateString()}</td>
-                <td className="px-6 py-4">
-                  <div className="flex gap-2">
-                    {user.id !== currentUserId && (
-                      <>
-                        <button
-                          onClick={() => toggleAdmin(user.id, user.is_admin)}
-                          disabled={updating === user.id}
-                          className="p-1 text-zinc-400 hover:text-black"
-                          title={user.is_admin ? 'Remove admin' : 'Make admin'}
-                        >
-                          <RiAdminLine size={18} />
-                        </button>
-                        <button
-                          onClick={() => deleteUser(user.id)}
-                          className="p-1 text-zinc-400 hover:text-red-600"
-                        >
-                          <RiDeleteBinLine size={18} />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-zinc-50 border-b border-zinc-100">
+              <tr>
+                <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">User</th>
+                <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">Email</th>
+                <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">Role</th>
+                <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">Joined</th>
+                <th className="px-6 py-3 text-xs font-black uppercase text-zinc-400">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user.id} className="border-b border-zinc-100 hover:bg-zinc-50/50">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold">
+                        {user.first_name?.[0]}{user.last_name?.[0]}
+                      </div>
+                      <span>{user.first_name} {user.last_name}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">{user.email}</td>
+                  <td className="px-6 py-4">
+                    {user.is_admin ? (
+                      <span className="text-xs font-bold bg-black text-white px-2 py-1 rounded-full">Admin</span>
+                    ) : (
+                      <span className="text-xs font-bold bg-zinc-100 text-zinc-700 px-2 py-1 rounded-full">Customer</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-sm">{new Date(user.created_at).toLocaleDateString()}</td>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      {user.id !== currentUserId && (
+                        <>
+                          <button
+                            onClick={() => toggleAdmin(user.id, user.is_admin)}
+                            disabled={updating === user.id}
+                            className="p-1 text-zinc-400 hover:text-black transition"
+                            title={user.is_admin ? 'Remove admin' : 'Make admin'}
+                          >
+                            <RiAdminLine size={18} />
+                          </button>
+                          <button
+                            onClick={() => deleteUser(user.id)}
+                            className="p-1 text-zinc-400 hover:text-red-600 transition"
+                          >
+                            <RiDeleteBinLine size={18} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {filteredUsers.length === 0 && (
+                <tr><td colSpan="5" className="px-6 py-12 text-center text-zinc-400">No users found</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

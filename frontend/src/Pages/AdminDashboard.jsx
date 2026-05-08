@@ -39,7 +39,7 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error('Failed to load admin data', err);
       if (err.response?.status === 401 || err.response?.status === 403) {
-        logout(); // clear invalid session
+        logout();
         navigate('/login');
       }
     } finally {
@@ -71,7 +71,9 @@ const AdminDashboard = () => {
       <div className="flex">
         <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} />
         <main className="flex-1 p-6 lg:p-8">
-          {activeTab === 'stats' && <AdminStats stats={stats} />}
+          {activeTab === 'stats' && (
+            <AdminStats stats={stats} orders={orders} users={users} />
+          )}
           {activeTab === 'products' && (
             <AdminProducts products={products} onRefresh={handleProductUpdate} />
           )}
