@@ -16,8 +16,6 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onP
 
   const handleCardClick = () => {
     addToRecentlyViewed(product.id);
-    // Optionally also open preview if you want the whole card clickable
-    // if (onPreview) onPreview(product);
   };
 
   const handleQuickView = (e) => {
@@ -30,9 +28,9 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onP
   const discountedPrice = hasDiscount ? product.price * (1 - product.discount / 100) : product.price;
   const avgRating = product.avg_rating || 0;
   const reviewCount = product.reviews_count || 0;
-
   const currentImage = images[imgIdx];
   const imageUrl = currentImage ? `${API}/uploads/${currentImage}` : null;
+  const isLowStock = product.stock > 0 && product.stock <= (product.low_stock_threshold || 5);
 
   return (
     <div
@@ -47,7 +45,6 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onP
       onMouseLeave={() => setHovered(false)}
       onClick={handleCardClick}
     >
-      {/* Image container */}
       <div className="relative aspect-[4/3] bg-zinc-50 overflow-hidden flex items-center justify-center">
         {imageUrl && !imgError ? (
           <img
@@ -68,6 +65,17 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onP
             <span className="bg-red-600 text-white text-[11px] font-black px-2 py-0.5 rounded-full shadow-md">
               -{product.discount}%
             </span>
+          </div>
+        )}
+
+        {product.stock === 0 && (
+          <div className="absolute bottom-2 left-2 z-10">
+            <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">Out of stock</span>
+          </div>
+        )}
+        {isLowStock && product.stock > 0 && (
+          <div className="absolute bottom-2 left-2 z-10">
+            <span className="bg-yellow-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full">Low stock</span>
           </div>
         )}
 
@@ -139,7 +147,12 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onP
           <div className="flex items-center gap-1.5">
             <button
               onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
-              className="flex items-center gap-1 bg-black text-white text-[10px] font-bold px-2 py-1.5 rounded-lg hover:bg-zinc-800 transition-colors active:scale-95"
+              disabled={product.stock === 0}
+              className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1.5 rounded-lg transition-colors active:scale-95 ${
+                product.stock === 0
+                  ? 'bg-zinc-300 text-white cursor-not-allowed'
+                  : 'bg-black text-white hover:bg-zinc-800'
+              }`}
             >
               <RiAddLine size={11} /> Add
             </button>

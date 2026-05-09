@@ -4,7 +4,7 @@ import axios from 'axios';
 import { API } from '../common/constants';
 import { getToken } from '../common/utils/auth';
 import OrderDetailsModal from './OrderDetailsModal';
-import { RiSearchLine, RiCloseLine, RiFilterLine } from 'react-icons/ri';
+import { RiSearchLine, RiCloseLine, RiFilterLine, RiFileDownloadLine } from 'react-icons/ri';
 
 const STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'all'];
 
@@ -62,6 +62,11 @@ const AdminOrders = ({ orders, onRefresh }) => {
     setShowModal(true);
   };
 
+  const downloadInvoice = (orderId) => {
+    const token = getToken();
+    window.open(`${API}/orders/${orderId}/invoice?token=${token}`, '_blank');
+  };
+
   return (
     <div>
       <div className="mb-6">
@@ -69,7 +74,6 @@ const AdminOrders = ({ orders, onRefresh }) => {
         <p className="text-sm text-zinc-500 mt-1">Manage customer orders</p>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="relative flex-1">
           <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={14} />
@@ -122,7 +126,7 @@ const AdminOrders = ({ orders, onRefresh }) => {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex gap-2 items-center">
+                    <div className="flex gap-2 items-center flex-wrap">
                       <select
                         value={order.status}
                         onChange={(e) => updateStatus(order.id, e.target.value)}
@@ -138,6 +142,12 @@ const AdminOrders = ({ orders, onRefresh }) => {
                         className="text-xs font-bold text-black border border-zinc-200 px-3 py-1 rounded-lg hover:bg-zinc-100"
                       >
                         View
+                      </button>
+                      <button
+                        onClick={() => downloadInvoice(order.id)}
+                        className="text-xs font-bold text-black border border-zinc-200 px-3 py-1 rounded-lg hover:bg-zinc-100 flex items-center gap-1"
+                      >
+                        <RiFileDownloadLine size={12} /> PDF
                       </button>
                     </div>
                   </td>

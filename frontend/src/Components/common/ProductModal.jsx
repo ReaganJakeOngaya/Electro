@@ -13,7 +13,6 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
   const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', comment: '' });
   const [submitting, setSubmitting] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(null);
-
   const images = product?.images || [];
 
   useEffect(() => {
@@ -72,6 +71,7 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
   const discountedPrice = hasDiscount ? product.price * (1 - product.discount / 100) : product.price;
   const currentImage = images[imgIdx];
   const imageUrl = currentImage ? `${API}/uploads/${currentImage}` : null;
+  const isLowStock = product.stock > 0 && product.stock <= (product.low_stock_threshold || 5);
 
   return (
     <>
@@ -86,7 +86,6 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
           </div>
 
           <div className="p-6">
-            {/* Product images & details */}
             <div className="flex flex-col md:flex-row gap-6 mb-8">
               <div className="md:w-1/2 bg-zinc-50 rounded-xl overflow-hidden flex items-center justify-center min-h-[300px]">
                 {imageUrl && !imgError ? (
@@ -139,9 +138,24 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
                     <span className="text-3xl font-black">KSh {product.price.toLocaleString()}</span>
                   )}
                 </div>
+                <div className="mt-2">
+                  {product.stock === 0 ? (
+                    <span className="text-red-600 font-bold">Out of stock</span>
+                  ) : isLowStock ? (
+                    <span className="text-yellow-600 font-bold">Low stock – only {product.stock} left</span>
+                  ) : (
+                    <span className="text-green-600 font-bold">In stock ({product.stock})</span>
+                  )}
+                </div>
                 <div className="flex gap-3 pt-2">
-                  <button onClick={() => { onAddToCart(product); onClose(); }} className="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-zinc-800">
-                    Add to Cart
+                  <button
+                    onClick={() => { onAddToCart(product); onClose(); }}
+                    disabled={product.stock === 0}
+                    className={`flex-1 py-3 rounded-xl font-bold transition-colors ${
+                      product.stock === 0 ? 'bg-zinc-400 cursor-not-allowed' : 'bg-black text-white hover:bg-zinc-800'
+                    }`}
+                  >
+                    {product.stock === 0 ? 'Out of stock' : 'Add to Cart'}
                   </button>
                   <button onClick={() => onToggleWishlist(product.id)} className="w-12 h-12 rounded-xl border flex items-center justify-center hover:border-black">
                     {isWishlisted ? <RiHeartFill size={20} className="text-black" /> : <RiHeartLine size={20} />}
@@ -150,7 +164,6 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
               </div>
             </div>
 
-            {/* Reviews section (unchanged – same as earlier) */}
             <div className="border-t pt-6">
               <h3 className="text-lg font-black mb-4">Customer Reviews</h3>
               <form onSubmit={handleReviewSubmit} className="bg-zinc-50 p-4 rounded-xl mb-6">

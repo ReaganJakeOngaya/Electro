@@ -14,8 +14,8 @@ const CheckoutView = ({ cart, onClearCart, onBack }) => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponMessage, setCouponMessage] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
-  const shipping = subtotal - discountTotal > 5000 ? 0 : 250;
-  const finalTotal = subtotal - discountTotal - couponDiscount + shipping;
+  const shippingCost = subtotal - discountTotal > 5000 ? 0 : 250;
+  const finalTotal = subtotal - discountTotal - couponDiscount + shippingCost;
 
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phone: '', address: '', city: '', postalCode: '', country: 'Kenya', paymentMethod: 'mpesa',
@@ -82,7 +82,7 @@ const CheckoutView = ({ cart, onClearCart, onBack }) => {
       discountTotal: discountTotal,
       coupon_code: appliedCoupon,
       coupon_discount: couponDiscount,
-      shipping,
+      shippingCost: shippingCost,
       total: finalTotal,
     };
     try {
@@ -125,7 +125,7 @@ const CheckoutView = ({ cart, onClearCart, onBack }) => {
               <div className="flex justify-between text-sm"><span>Subtotal</span><span>KSh {(subtotal - discountTotal).toLocaleString()}</span></div>
               {discountTotal > 0 && <div className="flex justify-between text-sm text-green-600"><span>Product discount</span><span>- KSh {discountTotal.toLocaleString()}</span></div>}
               {couponDiscount > 0 && <div className="flex justify-between text-sm text-green-600"><span>Coupon discount</span><span>- KSh {couponDiscount.toLocaleString()}</span></div>}
-              <div className="flex justify-between text-sm"><span>Shipping</span><span>{shipping === 0 ? 'Free' : `KSh ${shipping.toLocaleString()}`}</span></div>
+              <div className="flex justify-between text-sm"><span>Shipping</span><span>{shippingCost === 0 ? 'Free' : `KSh ${shippingCost.toLocaleString()}`}</span></div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t"><span>Total</span><span>KSh {finalTotal.toLocaleString()}</span></div>
             </div>
           </div>

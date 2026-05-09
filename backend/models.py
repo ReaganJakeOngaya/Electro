@@ -32,6 +32,8 @@ class Product(db.Model):
     images = db.Column(db.Text, nullable=True)
     price = db.Column(db.Float, nullable=False)
     discount = db.Column(db.Float, default=0.0)
+    stock = db.Column(db.Integer, default=0)                
+    low_stock_threshold = db.Column(db.Integer, default=5)
     category = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)

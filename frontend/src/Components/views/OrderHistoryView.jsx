@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API } from '../common/constants';
 import { getToken, getUser } from '../common/utils/auth';
-import { RiEyeLine, RiShoppingBagLine } from 'react-icons/ri';
+import { RiEyeLine, RiShoppingBagLine, RiFileDownloadLine } from 'react-icons/ri';
 import OrderDetailsModal from '../common/OrderDetailsModal';
 
 const OrderHistoryView = () => {
@@ -48,6 +48,11 @@ const OrderHistoryView = () => {
     setShowModal(true);
   };
 
+  const downloadInvoice = (orderId) => {
+    const token = getToken();
+    window.open(`${API}/orders/${orderId}/invoice?token=${token}`, '_blank');
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -58,7 +63,6 @@ const OrderHistoryView = () => {
 
   return (
     <div className="max-w-5xl mx-auto">
-      {/* Header */}
       <div className="mb-8">
         <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-1">Your orders</p>
         <h2 className="text-3xl font-black tracking-tighter text-black">Order History</h2>
@@ -74,7 +78,6 @@ const OrderHistoryView = () => {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden shadow-sm">
-          {/* Desktop table – hidden on mobile */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-zinc-50 border-b border-zinc-100">
@@ -100,12 +103,20 @@ const OrderHistoryView = () => {
                     </td>
                     <td className="px-6 py-4 text-sm capitalize text-zinc-600">{order.paymentMethod.replace('_', ' ')}</td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={() => viewDetails(order)}
-                        className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-black transition-colors"
-                      >
-                        <RiEyeLine size={14} /> View
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => viewDetails(order)}
+                          className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-black transition-colors"
+                        >
+                          <RiEyeLine size={14} /> View
+                        </button>
+                        <button
+                          onClick={() => downloadInvoice(order.id)}
+                          className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-black transition-colors"
+                        >
+                          <RiFileDownloadLine size={14} /> Invoice
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -113,7 +124,6 @@ const OrderHistoryView = () => {
             </table>
           </div>
 
-          {/* Mobile card view – visible on small screens */}
           <div className="block md:hidden divide-y divide-zinc-100">
             {orders.map((order) => (
               <div key={order.id} className="p-4 space-y-3">
@@ -122,12 +132,14 @@ const OrderHistoryView = () => {
                     <p className="font-mono text-sm font-bold">#{order.order_number}</p>
                     <p className="text-xs text-zinc-400 mt-0.5">{new Date(order.createdAt).toLocaleDateString()}</p>
                   </div>
-                  <button
-                    onClick={() => viewDetails(order)}
-                    className="text-xs font-bold text-zinc-500 hover:text-black flex items-center gap-1"
-                  >
-                    <RiEyeLine size={14} /> Details
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={() => viewDetails(order)} className="text-xs font-bold text-zinc-500 hover:text-black">
+                      Details
+                    </button>
+                    <button onClick={() => downloadInvoice(order.id)} className="text-xs font-bold text-zinc-500 hover:text-black">
+                      Invoice
+                    </button>
+                  </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <div>

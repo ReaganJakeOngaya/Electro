@@ -21,6 +21,8 @@ const ProductFormModal = ({ open, onClose, product, onSaved }) => {
     color: '',
     manufacture_date: '',
     images: [],
+    stock: 0,
+    low_stock_threshold: 5,
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -39,12 +41,15 @@ const ProductFormModal = ({ open, onClose, product, onSaved }) => {
         color: product.color || '',
         manufacture_date: product.manufacture_date || '',
         images: product.images || [],
+        stock: product.stock ?? 0,
+        low_stock_threshold: product.low_stock_threshold ?? 5,
       });
       setImagePreviews(product.images?.map(img => `${API}/uploads/${img}`) || []);
     } else {
       setFormData({
         name: '', description: '', brand: '', price: '', discount: 0,
-        category: 'Smartphones', color: '', manufacture_date: '', images: []
+        category: 'Smartphones', color: '', manufacture_date: '', images: [],
+        stock: 0, low_stock_threshold: 5,
       });
       setImageFiles([]);
       setImagePreviews([]);
@@ -89,7 +94,9 @@ const ProductFormModal = ({ open, onClose, product, onSaved }) => {
         price: Number(formData.price),
         discount: Number(formData.discount) || 0,
         images: uploadedPaths,
-        manufacture_date: formData.manufacture_date || null
+        manufacture_date: formData.manufacture_date || null,
+        stock: parseInt(formData.stock) || 0,
+        low_stock_threshold: parseInt(formData.low_stock_threshold) || 5,
       };
       if (product?.id) {
         await axios.put(`${API}/admin/products/${product.id}`, payload, {
@@ -158,6 +165,16 @@ const ProductFormModal = ({ open, onClose, product, onSaved }) => {
               <div>
                 <label className="form-label">Manufacture date (optional)</label>
                 <input type="date" name="manufacture_date" value={formData.manufacture_date} onChange={handleChange} className="form-input" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="form-label">Stock Quantity</label>
+                <input type="number" name="stock" value={formData.stock} onChange={handleChange} min="0" className="form-input" />
+              </div>
+              <div>
+                <label className="form-label">Low Stock Threshold</label>
+                <input type="number" name="low_stock_threshold" value={formData.low_stock_threshold} onChange={handleChange} min="1" className="form-input" />
               </div>
             </div>
             <div>

@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
@@ -8,9 +8,14 @@ from datetime import datetime, timedelta
 import secrets
 import os
 from werkzeug.utils import secure_filename
-from models import db, User, Product, Order, OrderItem, Setting, Review, Coupon   # NEW
+from models import db, User, Product, Order, OrderItem, Setting, Review, Coupon
 from utils import generate_token, verify_token
-from PIL import Image   # NEW – for WebP conversion
+from PIL import Image
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from io import BytesIO
 
 def product_to_dict(p):
     return {
@@ -25,12 +30,14 @@ def product_to_dict(p):
         'discount': p.discount,
         'category': p.category,
         'created_at': p.created_at.isoformat() if p.created_at else None,
-        'avg_rating': db.session.query(db.func.avg(Review.rating)).filter(Review.product_id == p.id).scalar() or 0,   # NEW
-        'reviews_count': Review.query.filter_by(product_id=p.id).count()   # NEW
+        'avg_rating': db.session.query(db.func.avg(Review.rating)).filter(Review.product_id == p.id).scalar() or 0,
+        'reviews_count': Review.query.filter_by(product_id=p.id).count(),
+        'stock': p.stock,
+        'low_stock_threshold': p.low_stock_threshold,
     }
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
 bcrypt = Bcrypt(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -53,12 +60,10 @@ def send_order_confirmation(order, user_email):
     msg = Message(subject, recipients=[user_email], body=body)
     mail.send(msg)
 
-# NEW – WebP conversion helper
 def convert_to_webp(source_path, dest_path):
     img = Image.open(source_path)
     img.save(dest_path, 'webp', quality=85)
 
-# Admin settings helpers (unchanged)
 def get_setting(key, default=None):
     setting = Setting.query.filter_by(key=key).first()
     return setting.value if setting else default
@@ -72,13 +77,11 @@ def set_setting(key, value):
         db.session.add(setting)
     db.session.commit()
 
-# Ensure upload directory exists
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
 with app.app_context():
     db.create_all()
-    # Create default admin
     admin = User.query.filter_by(is_admin=True).first()
     if not admin:
         hashed = bcrypt.generate_password_hash('admin123').decode('utf-8')
@@ -89,7 +92,6 @@ with app.app_context():
         db.session.add(admin_user)
         db.session.commit()
         print('Default admin created: admin@example.com / admin123')
-    # Seed default settings
     if not Setting.query.first():
         default_settings = {
             'store_name': 'DeviceYangu', 'store_email': 'info@deviceyangu.com',
@@ -122,7 +124,7 @@ def admin_required(f):
     return decorated
 
 # ----------------------------------------------
-#  AUTH & USER ROUTES (unchanged)
+#  AUTH & USER ROUTES
 # ----------------------------------------------
 @app.route('/register', methods=['POST'])
 def register():
@@ -247,7 +249,7 @@ def recover_account():
     return jsonify({"message": "Account not found or already active"}), 404
 
 # ----------------------------------------------
-#  PUBLIC PRODUCT ROUTES (with PAGINATION & reviews)
+#  PUBLIC PRODUCT ROUTES
 # ----------------------------------------------
 @app.route('/products', methods=['GET'])
 def get_products():
@@ -311,17 +313,12 @@ def add_review(product_id):
     user_id = verify_token(token)
     if not user_id:
         return jsonify({'message': 'Invalid token'}), 401
-    
     data = request.get_json()
     if not data.get('rating') or not data.get('comment'):
         return jsonify({'error': 'Rating and comment are required'}), 400
-    
     review = Review(
-        product_id=product_id,
-        user_id=user_id,
-        rating=data['rating'],
-        title=data.get('title'),
-        comment=data['comment']
+        product_id=product_id, user_id=user_id, rating=data['rating'],
+        title=data.get('title'), comment=data['comment']
     )
     db.session.add(review)
     db.session.commit()
@@ -338,7 +335,6 @@ def validate_coupon():
     coupon = Coupon.query.filter_by(code=code, is_active=True).first()
     if not coupon:
         return jsonify({'valid': False, 'message': 'Invalid coupon code'}), 404
-    
     now = datetime.now()
     if now < coupon.valid_from or now > coupon.valid_to:
         return jsonify({'valid': False, 'message': 'Coupon expired'}), 400
@@ -346,7 +342,6 @@ def validate_coupon():
         return jsonify({'valid': False, 'message': 'Coupon usage limit reached'}), 400
     if subtotal < coupon.min_order_amount:
         return jsonify({'valid': False, 'message': f'Minimum order of KSh {coupon.min_order_amount} required'}), 400
-    
     if coupon.discount_type == 'percentage':
         discount = subtotal * (coupon.discount_value / 100)
         if coupon.max_discount:
@@ -354,7 +349,6 @@ def validate_coupon():
     else:
         discount = coupon.discount_value
     discount = min(discount, subtotal)
-    
     return jsonify({
         'valid': True,
         'discount': discount,
@@ -363,7 +357,7 @@ def validate_coupon():
     }), 200
 
 # ----------------------------------------------
-#  ORDER CREATION (with email & guest checkout)
+#  ORDER CREATION (stock deduction)
 # ----------------------------------------------
 def generate_order_number():
     return str(secrets.randbelow(10**12 - 10**11) + 10**11)
@@ -375,6 +369,12 @@ def create_order():
     if not all(k in data for k in required):
         return jsonify({'message': 'Missing required order data'}), 400
 
+    # Stock validation
+    for item in data['items']:
+        product = Product.query.get(item['product_id'])
+        if not product or product.stock < item['quantity']:
+            return jsonify({'message': f'Insufficient stock for {item["name"]}. Only {product.stock if product else 0} left.'}), 400
+
     order_number = generate_order_number()
     while Order.query.filter_by(order_number=order_number).first():
         order_number = generate_order_number()
@@ -383,7 +383,7 @@ def create_order():
     shipping = data['shipping']
 
     order = Order(
-        user_id=data.get('user_id'),          # can be None for guest
+        user_id=data.get('user_id'),
         order_number=order_number,
         customer_first_name=customer['firstName'],
         customer_last_name=customer['lastName'],
@@ -411,9 +411,12 @@ def create_order():
         )
         db.session.add(order_item)
 
+        # Reduce stock
+        product = Product.query.get(item['product_id'])
+        product.stock -= item['quantity']
+
     db.session.commit()
 
-    # Send email confirmation
     try:
         send_order_confirmation(order, customer['email'])
     except Exception as e:
@@ -424,6 +427,72 @@ def create_order():
         'order_id': order.id,
         'order_number': order_number
     }), 201
+
+# ----------------------------------------------
+#  INVOICE GENERATION
+# ----------------------------------------------
+@app.route('/orders/<int:order_id>/invoice', methods=['GET'])
+def generate_invoice(order_id):
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        return jsonify({'message': 'Missing token'}), 401
+    token = auth_header.split(' ')[1]
+    user_id = verify_token(token)
+    if not user_id:
+        return jsonify({'message': 'Invalid token'}), 401
+
+    order = Order.query.get_or_404(order_id)
+    user = User.query.get(user_id)
+    if order.user_id != user_id and not user.is_admin:
+        return jsonify({'message': 'Unauthorized'}), 403
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('TitleStyle', parent=styles['Title'], fontSize=16, spaceAfter=20)
+    normal_style = styles['Normal']
+
+    story = []
+    store_name = get_setting('store_name', 'DeviceYangu')
+    store_email = get_setting('store_email', 'info@deviceyangu.com')
+    store_phone = get_setting('store_phone', '+254 700 000 000')
+    store_address = get_setting('store_address', 'Nairobi, Kenya')
+
+    story.append(Paragraph(f"<b>{store_name}</b>", title_style))
+    story.append(Paragraph(f"{store_address}", normal_style))
+    story.append(Paragraph(f"Email: {store_email} | Phone: {store_phone}", normal_style))
+    story.append(Spacer(1, 12))
+
+    story.append(Paragraph(f"INVOICE #{order.order_number}", title_style))
+    story.append(Paragraph(f"Date: {order.created_at.strftime('%Y-%m-%d %H:%M')}", normal_style))
+    story.append(Paragraph(f"Customer: {order.customer_first_name} {order.customer_last_name}", normal_style))
+    story.append(Paragraph(f"Email: {order.customer_email}", normal_style))
+    story.append(Spacer(1, 12))
+
+    items = OrderItem.query.filter_by(order_id=order.id).all()
+    table_data = [['Product', 'Qty', 'Unit Price', 'Total']]
+    for item in items:
+        total = item.product_price * item.quantity
+        table_data.append([item.product_name, str(item.quantity), f"KSh {item.product_price:,.2f}", f"KSh {total:,.2f}"])
+
+    table = Table(table_data, colWidths=[250, 50, 80, 80])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.grey),
+        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0,0), (-1,0), 12),
+        ('BACKGROUND', (0,1), (-1,-1), colors.beige),
+        ('GRID', (0,0), (-1,-1), 1, colors.black),
+    ]))
+    story.append(table)
+    story.append(Spacer(1, 12))
+    story.append(Paragraph(f"<b>Total: KSh {order.total:,.2f}</b>", title_style))
+    story.append(Paragraph("Thank you for shopping with us!", normal_style))
+
+    doc.build(story)
+    buffer.seek(0)
+    return send_file(buffer, as_attachment=True, download_name=f"invoice_{order.order_number}.pdf", mimetype='application/pdf')
 
 # ----------------------------------------------
 #  USER ORDER HISTORY
@@ -462,7 +531,7 @@ def get_user_orders(user_id):
     return jsonify(result), 200
 
 # ----------------------------------------------
-#  DEALS & NEW ARRIVALS (unchanged)
+#  DEALS & NEW ARRIVALS
 # ----------------------------------------------
 @app.route('/products/deals', methods=['GET'])
 def get_deals():
@@ -475,7 +544,7 @@ def get_new_arrivals():
     return jsonify([product_to_dict(p) for p in products])
 
 # ----------------------------------------------
-#  ADMIN ROUTES (expanded with coupon management)
+#  ADMIN ROUTES
 # ----------------------------------------------
 @app.route('/admin/stats', methods=['GET'])
 @admin_required
@@ -498,7 +567,8 @@ def admin_get_products():
         'color': p.color, 'brand': p.brand,
         'manufacture_date': p.manufacture_date.strftime('%Y-%m-%d') if p.manufacture_date else None,
         'images': p.images.split(',') if p.images else [], 'price': p.price,
-        'discount': p.discount, 'category': p.category
+        'discount': p.discount, 'category': p.category,
+        'stock': p.stock, 'low_stock_threshold': p.low_stock_threshold
     } for p in products])
 
 @app.route('/admin/products', methods=['POST'])
@@ -520,9 +590,13 @@ def admin_add_product():
     product = Product(
         name=data['name'], description=data['description'],
         color=data.get('color'), brand=data.get('brand'),
-        manufacture_date=manufacture_date, images=','.join(data.get('images', [])),
-        price=float(data['price']), discount=float(data.get('discount', 0)),
-        category=data['category']
+        manufacture_date=manufacture_date,
+        images=','.join(data.get('images', [])),
+        price=float(data['price']),
+        discount=float(data.get('discount', 0)),
+        category=data['category'],
+        stock=int(data.get('stock', 0)),
+        low_stock_threshold=int(data.get('low_stock_threshold', 5))
     )
     db.session.add(product)
     db.session.commit()
@@ -544,6 +618,8 @@ def admin_update_product(product_id):
     product.category = data.get('category', product.category)
     if 'images' in data:
         product.images = ','.join(data['images'])
+    product.stock = data.get('stock', product.stock)
+    product.low_stock_threshold = data.get('low_stock_threshold', product.low_stock_threshold)
     db.session.commit()
     return jsonify({'message': 'Product updated'})
 
@@ -571,7 +647,6 @@ def admin_upload_images():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             filenames.append(filename)
-            # NEW – also generate WebP version
             try:
                 webp_filename = f"{name}_{timestamp}.webp"
                 webp_path = os.path.join(app.config['UPLOAD_FOLDER'], webp_filename)
@@ -657,7 +732,6 @@ def admin_update_settings():
         set_setting(key, value)
     return jsonify({'message': 'Settings updated successfully'})
 
-# NEW – Admin coupon management (CRUD)
 @app.route('/admin/coupons', methods=['GET'])
 @admin_required
 def admin_get_coupons():
