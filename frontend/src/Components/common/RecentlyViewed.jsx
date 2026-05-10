@@ -23,7 +23,6 @@ const RecentlyViewed = ({ onAddToCart, onToggleWishlist, wishlist, onProductClic
         setRecentProducts(products);
       } catch (err) {
         console.error('Failed to fetch recently viewed products', err);
-        // On error, clear invalid IDs from localStorage to prevent repeated failures
         localStorage.removeItem('recentlyViewed');
       } finally {
         setLoading(false);
@@ -33,12 +32,16 @@ const RecentlyViewed = ({ onAddToCart, onToggleWishlist, wishlist, onProductClic
     fetchRecentlyViewed();
   }, []);
 
-  if (loading) return null; // or a small spinner if you prefer
+  if (loading) return null;
   if (recentProducts.length === 0) return null;
 
   return (
     <div className="mt-10">
-      <h2 className="text-lg font-black tracking-tight mb-4">Recently Viewed</h2>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-5 h-[2px] bg-orange-500" />
+        <p className="text-[9px] font-black uppercase tracking-[0.22em] text-orange-500">Continue browsing</p>
+      </div>
+      <h2 className="text-lg font-black tracking-tight text-black mb-4">Recently Viewed</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {recentProducts.map(product => (
           <ProductCard

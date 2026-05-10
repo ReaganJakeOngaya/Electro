@@ -1,3 +1,4 @@
+// src/Components/views/CheckoutView.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -95,83 +96,280 @@ const CheckoutView = ({ cart, onClearCart, onBack }) => {
   };
 
   const handleRefreshProfile = () => { setLoadingProfile(true); fetchUserProfile(); };
-  if (cart.length === 0) return <div className="text-center py-20"><p className="text-black font-bold">Your cart is empty.</p><button onClick={onBack} className="mt-4 text-sm underline">← Back to shopping</button></div>;
-  if (loadingProfile) return <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" /></div>;
+  if (cart.length === 0) return <div className="text-center py-20"><p className="text-black font-black">Your cart is empty.</p><button onClick={onBack} className="mt-4 text-xs font-black uppercase tracking-[0.08em] text-black underline">← Back to shopping</button></div>;
+  if (loadingProfile) return <div className="flex justify-center py-20"><div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" /></div>;
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4"><button onClick={onBack} className="text-black text-sm font-bold flex items-center gap-1">← Back to cart</button><h1 className="text-2xl font-black tracking-tighter">Checkout</h1></div>
-        <button onClick={handleRefreshProfile} className="text-xs text-zinc-500 hover:text-black flex items-center gap-1"><RiRefreshLine size={14} /> Refresh</button>
+    <div className="max-w-5xl mx-auto">
+      {/* Header with editorial style */}
+      <div className="flex items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onBack}
+            className="text-[10px] font-black uppercase tracking-[0.08em] text-gray-500 hover:text-black flex items-center gap-1"
+          >
+            ← Back to cart
+          </button>
+          <h1 className="text-2xl font-black tracking-tight text-black">Checkout</h1>
+        </div>
+        <button
+          onClick={handleRefreshProfile}
+          className="text-[10px] font-black uppercase tracking-[0.08em] text-gray-500 hover:text-black flex items-center gap-1"
+        >
+          <RiRefreshLine size={14} /> Refresh
+        </button>
       </div>
+
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Order Summary */}
-        <div className="lg:w-1/3 order-2 lg:order-1">
-          <div className="bg-zinc-50 rounded-2xl p-5 sticky top-24">
-            <h2 className="font-black mb-4">Order summary</h2>
-            {cart.map(item => {
-              const hasDiscount = item.discount > 0;
-              const itemTotal = item.price * item.qty;
-              const origTotal = (item.originalPrice || item.price) * item.qty;
-              return (
-                <div key={item.id} className="flex gap-3 text-sm mb-3">
-                  <div className="w-12 h-12 bg-zinc-200 rounded-lg overflow-hidden flex-shrink-0">{item.images?.[0] && <img src={`${API}/uploads/${item.images[0]}`} className="w-full h-full object-cover" />}</div>
-                  <div className="flex-1"><p className="font-bold">{item.name}</p><p className="text-zinc-500 text-xs">Qty: {item.qty}</p>{hasDiscount && <p className="text-[10px] text-zinc-400">Was KSh {origTotal.toLocaleString()}</p>}</div>
-                  <div className="text-right"><span className="font-black">KSh {itemTotal.toLocaleString()}</span>{hasDiscount && <p className="text-[10px] text-zinc-400 line-through">KSh {origTotal.toLocaleString()}</p>}</div>
+        {/* Order Summary – side panel */}
+        <div className="lg:w-2/5 order-2 lg:order-1">
+          <div className="bg-gray-50 border border-gray-100 p-6 rounded-sm sticky top-24">
+            <h2 className="text-sm font-black uppercase tracking-[0.12em] text-black mb-5">Order summary</h2>
+            <div className="space-y-4 mb-5">
+              {cart.map(item => {
+                const hasDiscount = item.discount > 0;
+                const itemTotal = item.price * item.qty;
+                const origTotal = (item.originalPrice || item.price) * item.qty;
+                return (
+                  <div key={item.id} className="flex gap-3 text-sm">
+                    <div className="w-12 h-12 rounded-sm bg-white border border-gray-100 overflow-hidden flex-shrink-0">
+                      {item.images?.[0] && <img src={`${API}/uploads/${item.images[0]}`} className="w-full h-full object-cover" alt="" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-black text-black">{item.name}</p>
+                      <p className="text-[9px] font-black uppercase tracking-[0.08em] text-gray-400">Qty: {item.qty}</p>
+                      {hasDiscount && <p className="text-[9px] font-black text-orange-500">-{item.discount}%</p>}
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-black text-black">KSh {itemTotal.toLocaleString()}</span>
+                      {hasDiscount && <p className="text-[9px] text-gray-400 line-through">KSh {origTotal.toLocaleString()}</p>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-gray-100 pt-4 space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-500">Subtotal</span>
+                <span className="font-medium text-black">KSh {(subtotal - discountTotal).toLocaleString()}</span>
+              </div>
+              {discountTotal > 0 && (
+                <div className="flex justify-between text-xs text-orange-500">
+                  <span>Product discount</span>
+                  <span>- KSh {discountTotal.toLocaleString()}</span>
                 </div>
-              );
-            })}
-            <div className="border-t pt-3 space-y-1">
-              <div className="flex justify-between text-sm"><span>Subtotal</span><span>KSh {(subtotal - discountTotal).toLocaleString()}</span></div>
-              {discountTotal > 0 && <div className="flex justify-between text-sm text-green-600"><span>Product discount</span><span>- KSh {discountTotal.toLocaleString()}</span></div>}
-              {couponDiscount > 0 && <div className="flex justify-between text-sm text-green-600"><span>Coupon discount</span><span>- KSh {couponDiscount.toLocaleString()}</span></div>}
-              <div className="flex justify-between text-sm"><span>Shipping</span><span>{shippingCost === 0 ? 'Free' : `KSh ${shippingCost.toLocaleString()}`}</span></div>
-              <div className="flex justify-between font-bold text-lg pt-2 border-t"><span>Total</span><span>KSh {finalTotal.toLocaleString()}</span></div>
+              )}
+              {couponDiscount > 0 && (
+                <div className="flex justify-between text-xs text-orange-500">
+                  <span>Coupon discount</span>
+                  <span>- KSh {couponDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-500">Shipping</span>
+                <span className="font-medium text-black">{shippingCost === 0 ? 'Free' : `KSh ${shippingCost.toLocaleString()}`}</span>
+              </div>
+              <div className="flex justify-between font-black text-base pt-2 border-t border-gray-100">
+                <span>Total</span>
+                <span>KSh {finalTotal.toLocaleString()}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Checkout Form */}
-        <div className="lg:w-2/3 order-1 lg:order-2">
+        <div className="lg:w-3/5 order-1 lg:order-2">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 border">
-              <h2 className="font-black mb-4">Contact information</h2>
+            {/* Contact information */}
+            <div className="bg-white border border-gray-100 p-6 rounded-sm">
+              <h2 className="text-xs font-black uppercase tracking-[0.12em] text-black mb-5">Contact information</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><label className="form-label">First name</label><input name="firstName" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} required className="form-input" /></div>
-                <div><label className="form-label">Last name</label><input name="lastName" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} required className="form-input" /></div>
-                <div className="sm:col-span-2"><label className="form-label">Email</label><input type="email" name="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required className="form-input" /></div>
-                <div className="sm:col-span-2"><label className="form-label">Phone number</label><input name="phone" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} required placeholder="0712 345 678" className="form-input" /></div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 mb-1">First name</label>
+                  <input
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={e => setFormData({...formData, firstName: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 mb-1">Last name</label>
+                  <input
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={e => setFormData({...formData, lastName: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 mb-1">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={e => setFormData({...formData, email: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 mb-1">Phone number</label>
+                  <input
+                    name="phone"
+                    value={formData.phone}
+                    onChange={e => setFormData({...formData, phone: e.target.value})}
+                    required
+                    placeholder="0712 345 678"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 border">
-              <h2 className="font-black mb-4">Shipping address</h2>
+            {/* Shipping address */}
+            <div className="bg-white border border-gray-100 p-6 rounded-sm">
+              <h2 className="text-xs font-black uppercase tracking-[0.12em] text-black mb-5">Shipping address</h2>
               <div className="space-y-4">
-                <div><label className="form-label">Street address</label><input name="address" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} required className="form-input" /></div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label>City</label><input name="city" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} required className="form-input" /></div><div><label>Postal code</label><input name="postalCode" value={formData.postalCode} onChange={e => setFormData({...formData, postalCode: e.target.value})} className="form-input" /></div></div>
-                <div><label>Country</label><input name="country" value={formData.country} onChange={e => setFormData({...formData, country: e.target.value})} required className="form-input" /></div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 mb-1">Street address</label>
+                  <input
+                    name="address"
+                    value={formData.address}
+                    onChange={e => setFormData({...formData, address: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 mb-1">City</label>
+                    <input
+                      name="city"
+                      value={formData.city}
+                      onChange={e => setFormData({...formData, city: e.target.value})}
+                      required
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 mb-1">Postal code</label>
+                    <input
+                      name="postalCode"
+                      value={formData.postalCode}
+                      onChange={e => setFormData({...formData, postalCode: e.target.value})}
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.1em] text-gray-500 mb-1">Country</label>
+                  <input
+                    name="country"
+                    value={formData.country}
+                    onChange={e => setFormData({...formData, country: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 border">
-              <h2 className="font-black mb-4">Coupon code</h2>
-              <div className="flex gap-2"><input type="text" value={couponCode} onChange={e => setCouponCode(e.target.value)} placeholder="Enter coupon code" className="form-input flex-1" /><button type="button" onClick={applyCoupon} className="bg-black text-white px-4 rounded-xl">Apply</button></div>
-              {couponMessage && <p className="text-sm mt-2 text-green-600">{couponMessage}</p>}
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 border">
-              <h2 className="font-black mb-4">Payment method</h2>
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-zinc-50"><input type="radio" name="paymentMethod" value="mpesa" checked={formData.paymentMethod === 'mpesa'} onChange={e => setFormData({...formData, paymentMethod: e.target.value})} /><span className="font-semibold">M-Pesa</span></label>
-                <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-zinc-50"><input type="radio" name="paymentMethod" value="cash_on_delivery" checked={formData.paymentMethod === 'cash_on_delivery'} onChange={e => setFormData({...formData, paymentMethod: e.target.value})} /><span className="font-semibold">Cash on delivery</span></label>
-                <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-zinc-50"><input type="radio" name="paymentMethod" value="card" checked={formData.paymentMethod === 'card'} onChange={e => setFormData({...formData, paymentMethod: e.target.value})} /><span className="font-semibold">Credit / Debit card</span></label>
+            {/* Coupon */}
+            <div className="bg-white border border-gray-100 p-6 rounded-sm">
+              <h2 className="text-xs font-black uppercase tracking-[0.12em] text-black mb-4">Coupon code</h2>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={e => setCouponCode(e.target.value)}
+                  placeholder="Enter coupon code"
+                  className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                />
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  className="bg-black text-white text-[10px] font-black uppercase tracking-[0.08em] px-4 py-2 rounded-sm hover:bg-gray-800 transition"
+                >
+                  Apply
+                </button>
               </div>
-              {formData.paymentMethod === 'mpesa' && <p className="text-xs text-zinc-500 mt-3">You will receive an STK push to complete payment.</p>}
+              {couponMessage && (
+                <p className={`text-xs font-bold mt-2 ${couponMessage.includes('Invalid') ? 'text-red-500' : 'text-orange-500'}`}>
+                  {couponMessage}
+                </p>
+              )}
             </div>
 
-            {error && <div className="text-red-600 text-sm text-center">{error}</div>}
-            <div className="flex justify-end gap-3 pt-4"><button type="button" onClick={onBack} className="btn-secondary">Cancel</button><button type="submit" disabled={loading} className="btn-primary">{loading ? 'Processing...' : `Place order • KSh ${finalTotal.toLocaleString()}`}</button></div>
-            <p className="text-xs text-zinc-400 text-center mt-6">* If address/phone missing, <button type="button" onClick={handleRefreshProfile} className="underline">refresh</button> or update your account profile.</p>
+            {/* Payment method */}
+            <div className="bg-white border border-gray-100 p-6 rounded-sm">
+              <h2 className="text-xs font-black uppercase tracking-[0.12em] text-black mb-4">Payment method</h2>
+              <div className="space-y-2">
+                {[
+                  { value: 'mpesa', label: 'M-Pesa' },
+                  { value: 'cash_on_delivery', label: 'Cash on delivery' },
+                  { value: 'card', label: 'Credit / Debit card' },
+                ].map(option => (
+                  <label
+                    key={option.value}
+                    className={`flex items-center gap-3 p-3 border rounded-sm cursor-pointer transition-all ${
+                      formData.paymentMethod === option.value
+                        ? 'border-black bg-gray-50'
+                        : 'border-gray-100 hover:border-gray-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={option.value}
+                      checked={formData.paymentMethod === option.value}
+                      onChange={e => setFormData({...formData, paymentMethod: e.target.value})}
+                      className="accent-black"
+                    />
+                    <span className="text-xs font-black uppercase tracking-[0.08em] text-black">{option.label}</span>
+                  </label>
+                ))}
+              </div>
+              {formData.paymentMethod === 'mpesa' && (
+                <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-gray-500 mt-3">
+                  You will receive an STK push to complete payment.
+                </p>
+              )}
+            </div>
+
+            {error && (
+              <div className="text-red-500 text-xs font-black uppercase tracking-[0.08em] text-center">
+                {error}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onBack}
+                className="px-5 py-2.5 rounded-sm border border-gray-200 text-[10px] font-black uppercase tracking-[0.08em] text-gray-500 hover:text-black hover:border-gray-400 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2.5 bg-black text-white text-[10px] font-black uppercase tracking-[0.08em] rounded-sm hover:bg-gray-800 transition disabled:opacity-50"
+              >
+                {loading ? 'Processing...' : `Place order • KSh ${finalTotal.toLocaleString()}`}
+              </button>
+            </div>
+
+            <p className="text-[9px] font-black uppercase tracking-[0.12em] text-gray-400 text-center mt-6">
+              * If address/phone missing,{' '}
+              <button type="button" onClick={handleRefreshProfile} className="underline text-black">
+                refresh
+              </button>{' '}
+              or update your account profile.
+            </p>
           </form>
         </div>
       </div>

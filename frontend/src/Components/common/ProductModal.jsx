@@ -77,17 +77,18 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
     <>
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" onClick={onClose} />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto pointer-events-auto shadow-2xl">
-          <div className="sticky top-0 bg-white border-b border-zinc-100 px-6 py-4 flex justify-between items-center">
-            <h2 className="text-xl font-black tracking-tight">{product.name}</h2>
-            <button onClick={onClose} className="w-8 h-8 rounded-full border border-zinc-200 flex items-center justify-center">
+        <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto pointer-events-auto shadow-2xl rounded-sm">
+          {/* Header - editorial sharp */}
+          <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+            <h2 className="text-xl font-black tracking-tight text-black">{product.name}</h2>
+            <button onClick={onClose} className="w-8 h-8 rounded-sm border border-gray-200 flex items-center justify-center hover:border-black transition-colors">
               <RiCloseLine size={16} />
             </button>
           </div>
 
           <div className="p-6">
             <div className="flex flex-col md:flex-row gap-6 mb-8">
-              <div className="md:w-1/2 bg-zinc-50 rounded-xl overflow-hidden flex items-center justify-center min-h-[300px]">
+              <div className="md:w-1/2 bg-gray-50 overflow-hidden flex items-center justify-center min-h-[300px] p-4">
                 {imageUrl && !imgError ? (
                   <img
                     src={imageUrl}
@@ -97,11 +98,11 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
                   />
                 ) : (
                   <div className="w-full h-full min-h-[250px] flex items-center justify-center">
-                    <RiShoppingBagLine className="text-6xl text-zinc-200" />
+                    <RiShoppingBagLine className="text-6xl text-gray-200" />
                   </div>
                 )}
                 {images.length > 1 && (
-                  <div className="flex gap-2 p-2 justify-center">
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                     {images.map((_, i) => (
                       <button
                         key={i}
@@ -115,91 +116,117 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
 
               <div className="md:w-1/2 space-y-4">
                 <div>
-                  <span className="text-xs font-bold uppercase text-zinc-400">{product.category}</span>
-                  {product.brand && <span className="ml-2 text-xs text-zinc-400">| {product.brand}</span>}
+                  <span className="text-[10px] font-black uppercase tracking-[0.12em] text-gray-400">{product.category}</span>
+                  {product.brand && <span className="ml-2 text-[10px] text-gray-400">| {product.brand}</span>}
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="flex">
+                  <div className="flex gap-0.5">
                     {[1,2,3,4,5].map(i => (
-                      <RiStarFill key={i} size={16} className={i <= avgRating ? 'text-yellow-500' : 'text-zinc-200'} />
+                      <RiStarFill key={i} size={14} className={i <= avgRating ? 'text-orange-500' : 'text-gray-200'} />
                     ))}
                   </div>
-                  <span className="text-sm text-zinc-500">({reviewCount} review{reviewCount !== 1 ? 's' : ''})</span>
+                  <span className="text-xs text-gray-500">({reviewCount} review{reviewCount !== 1 ? 's' : ''})</span>
                 </div>
-                <p className="text-zinc-600">{product.description}</p>
-                <div className="pt-4 border-t">
+                <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
+                <div className="pt-4 border-t border-gray-100">
                   {hasDiscount ? (
                     <div>
-                      <span className="text-3xl font-black">KSh {Math.round(discountedPrice).toLocaleString()}</span>
-                      <span className="text-sm text-zinc-400 line-through ml-2">KSh {product.price.toLocaleString()}</span>
-                      <span className="ml-2 text-red-600 font-bold">-{product.discount}%</span>
+                      <span className="text-3xl font-black text-black">KSh {Math.round(discountedPrice).toLocaleString()}</span>
+                      <span className="text-sm text-gray-400 line-through ml-2">KSh {product.price.toLocaleString()}</span>
+                      <span className="ml-2 text-orange-500 font-black text-sm">-{product.discount}%</span>
                     </div>
                   ) : (
-                    <span className="text-3xl font-black">KSh {product.price.toLocaleString()}</span>
+                    <span className="text-3xl font-black text-black">KSh {product.price.toLocaleString()}</span>
                   )}
                 </div>
                 <div className="mt-2">
                   {product.stock === 0 ? (
-                    <span className="text-red-600 font-bold">Out of stock</span>
+                    <span className="text-red-600 font-black text-xs uppercase tracking-wide">Out of stock</span>
                   ) : isLowStock ? (
-                    <span className="text-yellow-600 font-bold">Low stock – only {product.stock} left</span>
+                    <span className="text-orange-500 font-black text-xs uppercase tracking-wide">Low stock – only {product.stock} left</span>
                   ) : (
-                    <span className="text-green-600 font-bold">In stock ({product.stock})</span>
+                    <span className="text-green-600 font-black text-xs uppercase tracking-wide">In stock ({product.stock})</span>
                   )}
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     onClick={() => { onAddToCart(product); onClose(); }}
                     disabled={product.stock === 0}
-                    className={`flex-1 py-3 rounded-xl font-bold transition-colors ${
-                      product.stock === 0 ? 'bg-zinc-400 cursor-not-allowed' : 'bg-black text-white hover:bg-zinc-800'
+                    className={`flex-1 py-3 rounded-sm font-black text-xs uppercase tracking-[0.1em] transition-colors ${
+                      product.stock === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'
                     }`}
                   >
                     {product.stock === 0 ? 'Out of stock' : 'Add to Cart'}
                   </button>
-                  <button onClick={() => onToggleWishlist(product.id)} className="w-12 h-12 rounded-xl border flex items-center justify-center hover:border-black">
-                    {isWishlisted ? <RiHeartFill size={20} className="text-black" /> : <RiHeartLine size={20} />}
+                  <button
+                    onClick={() => onToggleWishlist(product.id)}
+                    className="w-12 h-12 rounded-sm border border-gray-200 flex items-center justify-center hover:border-black transition-colors"
+                  >
+                    {isWishlisted ? <RiHeartFill size={18} className="text-black" /> : <RiHeartLine size={18} className="text-gray-400" />}
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="border-t pt-6">
-              <h3 className="text-lg font-black mb-4">Customer Reviews</h3>
-              <form onSubmit={handleReviewSubmit} className="bg-zinc-50 p-4 rounded-xl mb-6">
+            {/* Reviews section */}
+            <div className="border-t border-gray-100 pt-6">
+              <h3 className="text-base font-black tracking-tight text-black mb-4">Customer Reviews</h3>
+              <form onSubmit={handleReviewSubmit} className="bg-gray-50 p-4 border border-gray-100 rounded-sm mb-6">
                 <div className="mb-3">
-                  <label className="block text-sm font-bold mb-1">Your rating</label>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">Your rating</label>
                   <div className="flex gap-1">
                     {[1,2,3,4,5].map(star => (
                       <button type="button" key={star} onClick={() => setReviewForm({...reviewForm, rating: star})}>
-                        {star <= reviewForm.rating ? <RiStarFill size={20} className="text-yellow-500" /> : <RiStarLine size={20} className="text-zinc-300" />}
+                        {star <= reviewForm.rating ? <RiStarFill size={16} className="text-orange-500" /> : <RiStarLine size={16} className="text-gray-300" />}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="mb-3">
-                  <label className="block text-sm font-bold mb-1">Title (optional)</label>
-                  <input type="text" value={reviewForm.title} onChange={e => setReviewForm({...reviewForm, title: e.target.value})} className="w-full px-3 py-2 border rounded-lg" />
+                  <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">Title (optional)</label>
+                  <input
+                    type="text"
+                    value={reviewForm.title}
+                    onChange={e => setReviewForm({...reviewForm, title: e.target.value})}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black"
+                  />
                 </div>
                 <div className="mb-3">
-                  <label className="block text-sm font-bold mb-1">Comment</label>
-                  <textarea rows="3" value={reviewForm.comment} onChange={e => setReviewForm({...reviewForm, comment: e.target.value})} className="w-full px-3 py-2 border rounded-lg" required />
+                  <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">Comment</label>
+                  <textarea
+                    rows="3"
+                    value={reviewForm.comment}
+                    onChange={e => setReviewForm({...reviewForm, comment: e.target.value})}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black"
+                    required
+                  />
                 </div>
-                <button type="submit" disabled={submitting} className="bg-black text-white px-4 py-2 rounded-lg text-sm font-bold">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="bg-black text-white text-[10px] font-black uppercase tracking-[0.1em] px-4 py-2 rounded-sm hover:bg-gray-800 transition"
+                >
                   {submitting ? 'Submitting...' : 'Submit Review'}
                 </button>
-                {reviewSuccess && <p className="text-green-600 text-sm mt-2">{reviewSuccess}</p>}
+                {reviewSuccess && <p className="text-green-600 text-xs font-bold mt-2">{reviewSuccess}</p>}
               </form>
 
-              {loadingReviews ? <p>Loading reviews...</p> : (
+              {loadingReviews ? (
+                <div className="flex justify-center py-4"><div className="w-4 h-4 border border-black border-t-transparent rounded-full animate-spin" /></div>
+              ) : (
                 <div className="space-y-4">
-                  {reviews.length === 0 && <p className="text-center text-zinc-400">No reviews yet. Be the first to review!</p>}
+                  {reviews.length === 0 && <p className="text-center text-gray-400 text-xs">No reviews yet. Be the first to review!</p>}
                   {reviews.map(rev => (
-                    <div key={rev.id} className="border-b pb-3">
-                      <div className="flex justify-between"><span className="font-bold">{rev.user_name}</span><span className="text-xs text-zinc-400">{new Date(rev.created_at).toLocaleDateString()}</span></div>
-                      <div className="flex gap-0.5 my-1">{[...Array(5)].map((_,i) => <RiStarFill key={i} size={12} className={i < rev.rating ? 'text-yellow-500' : 'text-zinc-200'} />)}</div>
-                      {rev.title && <p className="font-semibold text-sm">{rev.title}</p>}
-                      <p className="text-sm text-zinc-600">{rev.comment}</p>
+                    <div key={rev.id} className="border-b border-gray-100 pb-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-black text-black">{rev.user_name}</span>
+                        <span className="text-[9px] text-gray-400">{new Date(rev.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex gap-0.5 my-1">
+                        {[...Array(5)].map((_,i) => <RiStarFill key={i} size={10} className={i < rev.rating ? 'text-orange-500' : 'text-gray-200'} />)}
+                      </div>
+                      {rev.title && <p className="text-xs font-bold text-black mt-1">{rev.title}</p>}
+                      <p className="text-xs text-gray-600 mt-0.5">{rev.comment}</p>
                     </div>
                   ))}
                 </div>

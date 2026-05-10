@@ -21,9 +21,9 @@ const UserDashboard = () => {
   const [userState, setUserState] = useState(basicUser);
   const hasFetchedProfile = useRef(false);
 
-  const [allProducts, setAllProducts] = useState([]);      // full list for home & deals
+  const [allProducts, setAllProducts]       = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [activeNav, setActiveNav] = useState('home');
+  const [activeNav, setActiveNav]           = useState('home');
   const [activeCategory, setActiveCategory] = useState('All');
   const [cart, setCart] = useState(() => {
     try { return JSON.parse(localStorage.getItem('dy_cart')) || []; } catch { return []; }
@@ -31,12 +31,12 @@ const UserDashboard = () => {
   const [wishlist, setWishlist] = useState(() => {
     try { return JSON.parse(localStorage.getItem('dy_wishlist')) || []; } catch { return []; }
   });
-  const [cartOpen, setCartOpen] = useState(false);
+  const [cartOpen, setCartOpen]           = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [checkoutActive, setCheckoutActive] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen]   = useState(false);
+  const [checkoutActive, setCheckoutActive]   = useState(false);
 
-  // persist cart/wishlist
+  // persist cart / wishlist
   useEffect(() => { localStorage.setItem('dy_cart', JSON.stringify(cart)); }, [cart]);
   useEffect(() => { localStorage.setItem('dy_wishlist', JSON.stringify(wishlist)); }, [wishlist]);
 
@@ -45,11 +45,10 @@ const UserDashboard = () => {
     if (!basicUser || !getToken()) navigate('/auth');
   }, [basicUser, navigate]);
 
-  // fetch all products (home, deals, etc.)
+  // fetch all products
   useEffect(() => {
-    const fetchAllProducts = async () => {
+    (async () => {
       try {
-        // Get first page with large per_page to get all (or use a dedicated endpoint)
         const res = await axios.get(`${API}/products?page=1&per_page=100`);
         setAllProducts(res.data.products);
       } catch (err) {
@@ -57,38 +56,27 @@ const UserDashboard = () => {
       } finally {
         setLoadingProducts(false);
       }
-    };
-    fetchAllProducts();
+    })();
   }, []);
 
   // fetch full user profile once
   useEffect(() => {
     if (hasFetchedProfile.current) return;
     hasFetchedProfile.current = true;
-    const token = getToken();
+    const token  = getToken();
     const userId = basicUser?.id;
     if (!token || !userId) return;
-    axios.get(`${API}/user?user_id=${userId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => {
-        setUserState(res.data);
-        localStorage.setItem('user', JSON.stringify(res.data));
-      })
-      .catch(err => {
-        console.error('Failed to fetch user profile', err);
-        setUserState(basicUser);
-      });
+    axios.get(`${API}/user?user_id=${userId}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => { setUserState(res.data); localStorage.setItem('user', JSON.stringify(res.data)); })
+      .catch(() => setUserState(basicUser));
   }, [basicUser]);
 
   const refreshUser = useCallback(async () => {
-    const token = getToken();
+    const token  = getToken();
     const userId = basicUser?.id;
     if (!token || !userId) return;
     try {
-      const res = await axios.get(`${API}/user?user_id=${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await axios.get(`${API}/user?user_id=${userId}`, { headers: { Authorization: `Bearer ${token}` } });
       setUserState(res.data);
       localStorage.setItem('user', JSON.stringify(res.data));
     } catch (err) {
@@ -98,17 +86,10 @@ const UserDashboard = () => {
 
   // cart handlers
   const handleAddToCart = useCallback((product) => {
-    let finalPrice = product.price;
-    if (product.discount && product.discount > 0) {
-      finalPrice = product.price * (1 - product.discount / 100);
-    }
-    const cartItem = {
-      ...product,
-      originalPrice: product.price,
-      price: finalPrice,
-      discount: product.discount || 0,
-      qty: 1,
-    };
+    const finalPrice = product.discount > 0
+      ? product.price * (1 - product.discount / 100)
+      : product.price;
+    const cartItem = { ...product, originalPrice: product.price, price: finalPrice, discount: product.discount || 0, qty: 1 };
     setCart(prev => {
       const exists = prev.find(i => i.id === product.id);
       if (exists) return prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i);
@@ -116,29 +97,16 @@ const UserDashboard = () => {
     });
   }, []);
 
-  const handleCheckout = () => {
-    setCartOpen(false);
-    setCheckoutActive(true);
-  };
-
-  const handleOrderSuccess = () => {
-    setCart([]);
-    setCheckoutActive(false);
-    setActiveNav('home');
-  };
+  const handleCheckout    = () => { setCartOpen(false); setCheckoutActive(true); };
+  const handleOrderSuccess = () => { setCart([]); setCheckoutActive(false); setActiveNav('home'); };
 
   const handleUpdateQty = useCallback((id, qty) => {
     if (qty < 1) { handleRemoveFromCart(id); return; }
     setCart(prev => prev.map(i => i.id === id ? { ...i, qty } : i));
   }, []);
 
-  const handleRemoveFromCart = useCallback((id) => {
-    setCart(prev => prev.filter(i => i.id !== id));
-  }, []);
-
-  const handleToggleWishlist = useCallback((id) => {
-    setWishlist(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
-  }, []);
+  const handleRemoveFromCart   = useCallback((id) => setCart(prev => prev.filter(i => i.id !== id)), []);
+  const handleToggleWishlist   = useCallback((id) => setWishlist(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]), []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -148,12 +116,18 @@ const UserDashboard = () => {
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
 
-  // view render
   const renderView = () => {
     if (loadingProducts) {
       return (
-        <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          {/* Orange spinner */}
+          <div className="relative w-10 h-10">
+            <div className="absolute inset-0 rounded-full border-2 border-zinc-200" />
+            <div className="absolute inset-0 rounded-full border-2 border-t-orange-500 border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+          </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
+            Loading products…
+          </p>
         </div>
       );
     }
@@ -162,7 +136,7 @@ const UserDashboard = () => {
     }
     switch (activeNav) {
       case 'home':
-        return <HomeView user={userState} products={allProducts} onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlist={wishlist} onNavChange={setActiveNav} onCategoryChange={setActiveCategory} onProductClick={setSelectedProduct}/>;
+        return <HomeView user={userState} products={allProducts} onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlist={wishlist} onNavChange={setActiveNav} onCategoryChange={setActiveCategory} onProductClick={setSelectedProduct} />;
       case 'products':
         return <ProductsView onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} wishlist={wishlist} onProductClick={setSelectedProduct} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />;
       case 'wishlist':
@@ -191,6 +165,7 @@ const UserDashboard = () => {
           onCartOpen={() => setCartOpen(true)}
           onLogout={handleLogout}
         />
+
         <div className="flex-1 min-w-0">
           <MobileNav
             activeNav={activeNav}
@@ -204,13 +179,28 @@ const UserDashboard = () => {
             activeCategory={activeCategory}
             onCategoryChange={setActiveCategory}
           />
+
           <main className="px-4 lg:px-8 py-6 pb-24 lg:pb-8">
             {renderView()}
           </main>
         </div>
       </div>
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} onUpdateQty={handleUpdateQty} onRemove={handleRemoveFromCart} onCheckout={handleCheckout} />
-      <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} onToggleWishlist={handleToggleWishlist} isWishlisted={selectedProduct ? wishlist.includes(selectedProduct.id) : false} />
+
+      <CartDrawer
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+        cart={cart}
+        onUpdateQty={handleUpdateQty}
+        onRemove={handleRemoveFromCart}
+        onCheckout={handleCheckout}
+      />
+      <ProductModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={handleAddToCart}
+        onToggleWishlist={handleToggleWishlist}
+        isWishlisted={selectedProduct ? wishlist.includes(selectedProduct.id) : false}
+      />
     </div>
   );
 };

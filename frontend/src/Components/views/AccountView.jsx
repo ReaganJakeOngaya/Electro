@@ -1,4 +1,4 @@
-// src/components/views/AccountView.jsx
+// src/Components/views/AccountView.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { getUser, getToken, updateLocalUser, logout } from '../common/utils/auth';
@@ -27,7 +27,6 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
   const fileInputRef = useRef(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Refresh user data when component mounts
   useEffect(() => {
     fetchUserData();
   }, []);
@@ -49,12 +48,12 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
       });
       setAvatar(userData.avatar || '');
       setAvatarPreview(userData.avatar ? `${API}/uploads/${userData.avatar}` : '');
-      // Update localStorage user info
       updateLocalUser({
         first_name: userData.first_name,
         last_name: userData.last_name,
         avatar: userData.avatar
       });
+      if (onUserUpdate) onUserUpdate();
     } catch (err) {
       console.error('Failed to fetch user data', err);
     }
@@ -89,13 +88,10 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
       if (avatarFile) {
         newAvatar = await uploadAvatar();
       }
-      // Update profile
       await axios.put(`${API}/user/profile`, { ...formData, avatar: newAvatar }, {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
-      // Refresh local user data
       await fetchUserData();
-      if (onUserUpdate) onUserUpdate(); // notify parent to refresh sidebar etc.
       setIsEditing(false);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -118,16 +114,15 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      {/* Header */}
       <div className="mb-2">
-        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-1">Manage</p>
-        <h2 className="text-3xl font-black tracking-tighter text-black">Account</h2>
+        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Manage</p>
+        <h2 className="text-3xl font-black tracking-tight text-black">Account</h2>
       </div>
 
-      {/* Main profile card */}
-      <div className="bg-white rounded-2xl border border-zinc-100 overflow-hidden shadow-sm">
-        {/* Avatar section with subtle background */}
-        <div className="relative bg-zinc-50 px-6 pt-8 pb-6 border-b border-zinc-100">
+      {/* Profile card */}
+      <div className="bg-white border border-gray-100 overflow-hidden shadow-sm rounded-sm">
+        {/* Avatar section */}
+        <div className="relative bg-gray-50 px-6 pt-8 pb-6 border-b border-gray-100">
           <div className="flex flex-col items-center">
             <div className="relative mb-3">
               <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-md bg-white">
@@ -147,7 +142,7 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
               {isEditing && (
                 <button
                   onClick={() => fileInputRef.current.click()}
-                  className="absolute bottom-1 right-1 bg-black rounded-full p-1.5 border-2 border-white shadow-sm hover:bg-zinc-800 transition-colors"
+                  className="absolute bottom-1 right-1 bg-black rounded-full p-1.5 border-2 border-white shadow-sm hover:bg-gray-800 transition-colors"
                   title="Upload new avatar"
                 >
                   <RiUploadLine size={14} className="text-white" />
@@ -161,128 +156,124 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
                 className="hidden"
               />
             </div>
-            <h3 className="text-xl font-black tracking-tight">
+            <h3 className="text-xl font-black tracking-tight text-black">
               {formData.first_name} {formData.last_name}
             </h3>
-            <p className="text-sm text-zinc-500">{user?.email}</p>
+            <p className="text-sm text-gray-500">{user?.email}</p>
           </div>
         </div>
 
-        {/* Details section */}
+        {/* Details */}
         <div className="p-6">
           {!isEditing ? (
-            // View mode
             <>
               <div className="flex items-center justify-between mb-5">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-zinc-400">Profile details</p>
-                </div>
+                <p className="text-[10px] font-black uppercase tracking-[0.12em] text-gray-400">Profile details</p>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="flex items-center gap-1.5 text-xs font-bold text-zinc-500 hover:text-black transition-colors px-3 py-1.5 rounded-lg hover:bg-zinc-50"
+                  className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.08em] text-gray-500 hover:text-black transition-colors px-3 py-1.5 rounded-sm hover:bg-gray-50"
                 >
                   <RiEditLine size={14} /> Edit
                 </button>
               </div>
               <div className="space-y-3">
                 {[
-                  { label: 'Phone', value: formData.phone || '—', icon: null },
+                  { label: 'Phone', value: formData.phone || '—' },
                   { label: 'Address', value: formData.address || '—' },
                   { label: 'City', value: formData.city || '—' },
                   { label: 'Postal Code', value: formData.postal_code || '—' },
                   { label: 'Country', value: formData.country || 'Kenya' }
                 ].map(({ label, value }) => (
-                  <div key={label} className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-zinc-50 last:border-0">
-                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1 sm:mb-0">{label}</span>
+                  <div key={label} className="flex flex-col sm:flex-row sm:items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                    <span className="text-[10px] font-black uppercase tracking-[0.12em] text-gray-400 mb-1 sm:mb-0">{label}</span>
                     <span className="text-sm text-black font-medium">{value}</span>
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            // Edit mode
             <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-600 mb-1">First name</label>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">First name</label>
                   <input
                     name="first_name"
                     value={formData.first_name}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all bg-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-600 mb-1">Last name</label>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">Last name</label>
                   <input
                     name="last_name"
                     value={formData.last_name}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all bg-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-zinc-600 mb-1">Phone</label>
+                <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">Phone</label>
                 <input
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="+254 700 000 000"
-                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all bg-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-zinc-600 mb-1">Address</label>
+                <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">Address</label>
                 <input
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Street, building, apartment"
-                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all bg-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-600 mb-1">City</label>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">City</label>
                   <input
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all bg-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-600 mb-1">Postal Code</label>
+                  <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">Postal Code</label>
                   <input
                     name="postal_code"
                     value={formData.postal_code}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all bg-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-bold text-zinc-600 mb-1">Country</label>
+                <label className="block text-[10px] font-black uppercase tracking-[0.12em] text-gray-500 mb-1">Country</label>
                 <input
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all bg-white"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                 />
               </div>
               <div className="flex flex-col sm:flex-row gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-600 hover:text-black hover:border-zinc-400 transition-all"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm border border-gray-200 text-xs font-black uppercase tracking-[0.08em] text-gray-600 hover:text-black hover:border-gray-400 transition-all"
                 >
                   <RiCloseLine size={16} /> Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 bg-black text-white text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-zinc-800 transition-all disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 bg-black text-white text-xs font-black uppercase tracking-[0.08em] px-4 py-2.5 rounded-sm hover:bg-gray-800 transition-all disabled:opacity-50"
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -294,7 +285,7 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
                 </button>
               </div>
               {saveSuccess && (
-                <div className="mt-3 p-2 bg-green-50 text-green-700 text-xs font-semibold rounded-lg flex items-center justify-center gap-2">
+                <div className="mt-3 p-2 bg-green-50 text-green-700 text-xs font-black uppercase tracking-[0.08em] rounded-sm flex items-center justify-center gap-2">
                   <RiCheckLine size={14} /> Profile updated successfully
                 </div>
               )}
@@ -304,18 +295,18 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
       </div>
 
       {/* Danger zone */}
-      <div className="bg-white rounded-2xl border border-zinc-100 p-6 shadow-sm">
-        <h3 className="text-sm font-black uppercase tracking-wider text-zinc-400 mb-4">Account actions</h3>
+      <div className="bg-white border border-gray-100 p-6 rounded-sm shadow-sm">
+        <h3 className="text-[10px] font-black uppercase tracking-[0.12em] text-gray-400 mb-4">Account actions</h3>
         <div className="space-y-3">
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-zinc-600 hover:text-black hover:border-zinc-400 transition-all"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm border border-gray-200 bg-white text-xs font-black uppercase tracking-[0.08em] text-gray-600 hover:text-black hover:border-gray-400 transition-all"
           >
             <RiLogoutBoxLine size={18} /> Sign out
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 bg-white text-sm font-bold text-zinc-400 hover:text-red-600 hover:border-red-200 transition-all"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm border border-gray-200 bg-white text-xs font-black uppercase tracking-[0.08em] text-gray-400 hover:text-red-600 hover:border-red-200 transition-all"
           >
             <RiDeleteBinLine size={18} /> Delete account
           </button>
@@ -327,21 +318,21 @@ const AccountView = ({ user, onLogout, onUserUpdate }) => {
         <>
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50" onClick={() => setShowDeleteConfirm(false)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-sm pointer-events-auto shadow-xl border border-zinc-100">
-              <h3 className="text-lg font-black tracking-tight mb-2">Delete account?</h3>
-              <p className="text-sm text-zinc-500 mb-5">
-                Your account will be deactivated. You have <span className="font-bold text-black">7 days</span> to recover it before permanent deletion.
+            <div className="bg-white rounded-sm p-6 w-full max-w-sm pointer-events-auto shadow-xl border border-gray-100">
+              <h3 className="text-lg font-black tracking-tight text-black mb-2">Delete account?</h3>
+              <p className="text-sm text-gray-500 mb-5">
+                Your account will be deactivated. You have <span className="font-black text-black">7 days</span> to recover it before permanent deletion.
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-zinc-200 text-sm font-bold text-zinc-500 hover:text-black transition-colors"
+                  className="flex-1 py-2.5 rounded-sm border border-gray-200 text-xs font-black uppercase tracking-[0.08em] text-gray-500 hover:text-black transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAccount}
-                  className="flex-1 py-2.5 rounded-xl bg-black text-white text-sm font-bold hover:bg-zinc-800 transition-colors"
+                  className="flex-1 py-2.5 rounded-sm bg-black text-white text-xs font-black uppercase tracking-[0.08em] hover:bg-gray-800 transition-colors"
                 >
                   Delete
                 </button>
