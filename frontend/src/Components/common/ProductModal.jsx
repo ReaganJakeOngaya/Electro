@@ -1,6 +1,7 @@
 // src/Components/common/ProductModal.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { RiCloseLine, RiHeartLine, RiHeartFill, RiShoppingBagLine, RiStarFill, RiStarLine } from 'react-icons/ri';
 import { API } from './constants';
 import { getToken } from './utils/auth';
@@ -29,7 +30,7 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
       const res = await axios.get(`${API}/products/${product.id}/reviews`);
       setReviews(res.data);
     } catch (err) {
-      console.error('Failed to load reviews', err);
+      toast.error('Failed to load reviews', err);
     } finally {
       setLoadingReviews(false);
     }
@@ -39,7 +40,7 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
     e.preventDefault();
     const token = getToken();
     if (!token) {
-      alert('Please login to leave a review');
+      toast('Please login to leave a review');
       return;
     }
     setSubmitting(true);
@@ -51,8 +52,8 @@ const ProductModal = ({ product, onClose, onAddToCart, onToggleWishlist, isWishl
       setReviewForm({ rating: 5, title: '', comment: '' });
       fetchReviews();
       setTimeout(() => setReviewSuccess(null), 3000);
-    } catch (err) {
-      alert('Failed to add review');
+    } catch {
+      toast.error('Failed to add review');
     } finally {
       setSubmitting(false);
     }

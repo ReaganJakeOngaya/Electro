@@ -1,6 +1,7 @@
 // src/components/admin/AdminProducts.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { API } from '../common/constants';
 import { getToken } from '../common/utils/auth';
 import ProductFormModal from './ProductFormModal';
@@ -32,8 +33,8 @@ const AdminProducts = ({ products, onRefresh }) => {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       onRefresh();
-    } catch (err) {
-      alert('Failed to delete product');
+    } catch {
+      toast.error('Failed to delete product');
     }
   };
 

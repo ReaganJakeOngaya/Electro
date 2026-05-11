@@ -1,7 +1,8 @@
 import jwt
 from datetime import datetime, timedelta
+import os
 
-SECRET_KEY = 'your-secret-key-change-in-production'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
 def generate_token(user_id):
     payload = {

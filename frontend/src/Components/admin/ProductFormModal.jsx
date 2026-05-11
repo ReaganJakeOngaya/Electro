@@ -1,6 +1,7 @@
 // src/components/admin/ProductFormModal.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { API } from '../common/constants';
 import { getToken } from '../common/utils/auth';
 import { RiCloseLine, RiUploadLine } from 'react-icons/ri';
@@ -109,7 +110,7 @@ const ProductFormModal = ({ open, onClose, product, onSaved }) => {
       }
       onSaved();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save product');
+      toast.error(err.response?.data?.message || 'Failed to save product');
     } finally {
       setLoading(false);
     }

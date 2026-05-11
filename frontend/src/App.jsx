@@ -1,5 +1,7 @@
 // App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import LandingPage from './Pages/LandingPage';
 import Account from './Pages/Auth';
@@ -45,7 +47,20 @@ function App() {
             }
           />
           <Route path="*" element={<NotFound />} />
+          
         </Routes>
+        <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
       </div>
     </Router>
   );

@@ -1,5 +1,6 @@
 // src/Components/views/CheckoutView.jsx
 import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { API } from '../common/constants';
@@ -89,7 +90,7 @@ const CheckoutView = ({ cart, onClearCart, onBack }) => {
     try {
       await axios.post(`${API}/orders`, orderData, { headers: { Authorization: user?.id ? `Bearer ${getToken()}` : {} } });
       onClearCart();
-      alert('Order placed! Confirmation sent to your email.');
+      toast('Order placed! Confirmation sent to your email.');
       navigate('/user-dashboard');
     } catch (err) { setError(err.response?.data?.message || 'Failed to place order'); }
     finally { setLoading(false); }

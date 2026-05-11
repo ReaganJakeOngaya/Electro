@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import { RiEyeLine, RiEyeCloseLine, RiArrowLeftLine, RiAlertLine } from 'react-icons/ri';
 import { API } from '..//Components/common/constants';
@@ -427,7 +428,7 @@ const Auth = () => {
         firstName: signupData.firstName, lastName: signupData.lastName,
         email: signupData.email,         password: signupData.password,
       });
-      alert(res.data.message || 'Registration successful! Please log in.');
+      toast(res.data.message || 'Registration successful! Please log in.');
       setIsLogin(true);
       setSignupData({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
     } catch (err) {

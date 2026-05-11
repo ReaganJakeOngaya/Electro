@@ -1,6 +1,7 @@
 // src/components/admin/AdminOrders.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { API } from '../common/constants';
 import { getToken } from '../common/utils/auth';
 import OrderDetailsModal from './OrderDetailsModal';
@@ -39,8 +40,8 @@ const AdminOrders = ({ orders, onRefresh }) => {
         headers: { Authorization: `Bearer ${getToken()}` }
       });
       onRefresh();
-    } catch (err) {
-      alert('Failed to update order status');
+    } catch {
+      toast.error('Failed to update order status');
     } finally {
       setUpdating(null);
     }

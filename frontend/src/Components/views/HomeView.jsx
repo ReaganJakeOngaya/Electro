@@ -61,13 +61,13 @@ const SectionHeading = ({ eyebrow, title, onAction, actionLabel }) => (
 const CategoryTile = ({ label, icon: Icon, index, onClick }) => (
   <button
     onClick={onClick}
-    className="reveal group flex flex-col items-center gap-3 py-7 px-4 rounded-sm border border-zinc-100
+    className="reveal group flex flex-col items-center gap-3 py-7 px-4 border border-zinc-100
                bg-white hover:bg-black hover:border-black transition-all duration-200 relative overflow-hidden text-left"
     style={{ transitionDelay: `${index * 50}ms` }}
   >
     <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-orange-500
                     scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-    <div className="w-12 h-12 rounded-sm bg-zinc-50 group-hover:bg-white/10
+    <div className="w-12 h-12 bg-zinc-50 group-hover:bg-white/10
                     flex items-center justify-center transition-colors duration-200">
       <Icon className="text-xl text-black group-hover:text-orange-400 transition-colors duration-200" />
     </div>
@@ -89,7 +89,7 @@ const FeatureCard = ({ icon: Icon, title, desc, index }) => (
                     border-t-[28px] border-t-orange-500
                     border-l-[28px] border-l-transparent
                     group-hover:opacity-100 opacity-0 transition-opacity duration-300" />
-    <div className="w-11 h-11 rounded-sm bg-black flex items-center justify-center mb-5
+    <div className="w-11 h-11 bg-black flex items-center justify-center mb-5
                     group-hover:bg-orange-500 transition-colors duration-300">
       <Icon className="text-white" size={17} />
     </div>
@@ -135,7 +135,7 @@ const HomeView = ({ user, products, onAddToCart, onToggleWishlist, wishlist, onN
     <div className="space-y-16 pb-12">
 
       {/* ── Hero ──────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden rounded-sm">
+      <section className="relative overflow-hidden">
         <div className="absolute inset-0">
           <img src={heroImage} alt="" className="w-full h-full object-cover object-center" />
           <div className="absolute inset-0"
@@ -152,16 +152,16 @@ const HomeView = ({ user, products, onAddToCart, onToggleWishlist, wishlist, onN
             <div className="w-5 h-[2px] bg-orange-500" />
             <span className="text-orange-400 font-black uppercase"
                   style={{ fontSize: '0.6rem', letterSpacing: '0.22em' }}>
-              Welcome back
+              Welcome
             </span>
           </div>
 
           {/* Headline */}
           <h1 className="hero-copy delay-100 text-white max-w-xl"
-              style={{ fontSize: 'clamp(2rem, 6vw, 3.8rem)', fontWeight: 900,
+              style={{ fontSize: 'clamp(2rem, 6vw, 3.8rem)', fontWeight: 800,
                        letterSpacing: '-0.025em', lineHeight: 1.02 }}>
             Hey, <span className="text-orange-500">{user?.first_name}.</span><br />
-            <span className="text-white/30">Next-level tech.</span>
+            <span className="text-white/30">Your next-level tech.</span>
           </h1>
 
           <p className="hero-copy delay-200 text-zinc-400 text-sm leading-relaxed max-w-sm mt-4 mb-7 font-medium">
@@ -173,7 +173,7 @@ const HomeView = ({ user, products, onAddToCart, onToggleWishlist, wishlist, onN
             <button
               onClick={() => onNavChange('products')}
               className="inline-flex items-center gap-2.5 bg-orange-500 text-white font-black
-                         px-7 py-3.5 rounded-sm hover:bg-orange-600 hover:-translate-y-0.5
+                         px-7 py-3.5  hover:bg-orange-600 hover:-translate-y-0.5
                          transition-all text-xs uppercase tracking-widest"
               style={{ boxShadow: '0 8px 28px rgba(240,90,26,0.35)' }}
             >
@@ -182,18 +182,11 @@ const HomeView = ({ user, products, onAddToCart, onToggleWishlist, wishlist, onN
             <button
               onClick={() => onNavChange('deals')}
               className="inline-flex items-center gap-2.5 border border-white/10 text-white/40 font-black
-                         px-7 py-3.5 rounded-sm hover:border-orange-500/40 hover:text-orange-400
+                         px-7 py-3.5  hover:border-orange-500/40 hover:text-orange-400
                          transition-all text-xs uppercase tracking-widest"
             >
               <RiPercentLine size={13} /> View Deals
             </button>
-          </div>
-
-          {/* Stats row */}
-          <div className="hero-copy delay-500 flex gap-8 mt-10 pt-6 border-t border-white/8">
-            <StatPill value="50K+" label="Customers" />
-            <StatPill value="2K+"  label="Products"  />
-            <StatPill value="4.9★" label="Rating"    />
           </div>
         </div>
       </section>
@@ -243,7 +236,7 @@ const HomeView = ({ user, products, onAddToCart, onToggleWishlist, wishlist, onN
 
       {/* ── Deals strip ───────────────────────────────────────── */}
       {dealsProducts.length > 0 && (
-        <section className="relative overflow-hidden rounded-sm bg-black px-8 md:px-12 py-12">
+        <section className="relative overflow-hidden bg-black px-8 md:px-12 py-12">
           {/* Orange left edge */}
           <div className="absolute top-0 left-0 bottom-0 w-[3px] bg-orange-500" />
           {/* Subtle grid */}

@@ -193,6 +193,9 @@ const UserDashboard = () => {
         onUpdateQty={handleUpdateQty}
         onRemove={handleRemoveFromCart}
         onCheckout={handleCheckout}
+        allProducts={allProducts}
+        wishlist={wishlist}
+        onToggleWishlist={handleToggleWishlist}
       />
       <ProductModal
         product={selectedProduct}

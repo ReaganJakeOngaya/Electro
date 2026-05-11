@@ -8,8 +8,12 @@ from datetime import datetime, timedelta
 import secrets
 import os
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 from models import db, User, Product, Order, OrderItem, Setting, Review, Coupon
 from utils import generate_token, verify_token
+
+# Load environment variables
+load_dotenv()
 from PIL import Image
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
@@ -37,22 +41,38 @@ def product_to_dict(p):
     }
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173"], supports_credentials=True)
+
+# CORS Configuration
+allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+CORS(app, origins=allowed_origins, supports_credentials=True)
+
 bcrypt = Bcrypt(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+# Database Configuration
+if os.environ.get('DATABASE_URL'):
+    # PostgreSQL for production
+    database_url = os.environ.get('DATABASE_URL')
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # SQLite for development
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'webp'}
 db.init_app(app)
 
 # Email configuration
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', 'true').lower() == 'true'
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 mail = Mail(app)
+
+# Application settings
+app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('MAX_CONTENT_LENGTH', 16777216))
 
 def send_order_confirmation(order, user_email):
     subject = f"Order Confirmation #{order.order_number}"
@@ -806,4 +826,6 @@ def not_found(e):
     return jsonify({'error': 'Endpoint not found'}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug, port=port, host='0.0.0.0')

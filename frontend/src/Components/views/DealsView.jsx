@@ -218,10 +218,10 @@ const DealsView = ({ onAddToCart, onToggleWishlist, wishlist, onProductClick }) 
             Today's Deals
           </h1>
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <RiPercentLine className="text-orange-500" size={14} />
             <span className="text-[10px] font-black uppercase tracking-[0.14em] text-zinc-400">
               {products.length} deals active
             </span>
+            <RiPercentLine className="text-orange-500" size={14} />
           </div>
         </div>
       </div>
@@ -238,8 +238,8 @@ const DealsView = ({ onAddToCart, onToggleWishlist, wishlist, onProductClick }) 
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by name or brand…"
-              className="w-full pl-10 pr-10 py-3 text-xs font-bold bg-white border border-zinc-200
-                         rounded-sm outline-none transition-all
+              className="w-full pl-10 pr-10 py-3 text-xs font-bold bg-white border border-zinc-400
+                          outline-none transition-all
                          focus:border-orange-500 focus:ring-2 focus:ring-orange-500/15
                          placeholder:text-zinc-300 placeholder:font-normal"
             />
@@ -259,7 +259,7 @@ const DealsView = ({ onAddToCart, onToggleWishlist, wishlist, onProductClick }) 
               <button
                 onClick={() => setShowSort(!showSort)}
                 className="flex items-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-[0.1em]
-                           border border-zinc-200 rounded-sm bg-white text-zinc-500
+                           border border-zinc-500  bg-white text-zinc-500
                            hover:border-zinc-400 hover:text-black transition-all"
               >
                 <RiFilterLine size={13} />
@@ -270,8 +270,8 @@ const DealsView = ({ onAddToCart, onToggleWishlist, wishlist, onProductClick }) 
               {showSort && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowSort(false)} />
-                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-zinc-100
-                                  rounded-sm shadow-lg z-20 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-zinc-400
+                                   shadow-lg z-20 overflow-hidden">
                     {SORT_OPTIONS.map(opt => (
                       <button
                         key={opt.value}
@@ -293,7 +293,7 @@ const DealsView = ({ onAddToCart, onToggleWishlist, wishlist, onProductClick }) 
             </div>
 
             {/* Layout switcher */}
-            <div className="flex items-center p-0.5 border border-zinc-200 rounded-sm bg-white gap-0.5">
+            <div className="flex items-center p-0.5 border border-zinc-400 rounded-sm bg-white gap-0.5">
               {LAYOUTS.map(({ id, label, icon: Icon }) => {
                 const active = layoutId === id;
                 return (
@@ -301,7 +301,7 @@ const DealsView = ({ onAddToCart, onToggleWishlist, wishlist, onProductClick }) 
                     key={id}
                     onClick={() => setLayoutId(id)}
                     title={label}
-                    className={`w-8 h-8 rounded-sm flex items-center justify-center transition-all ${
+                    className={`w-8 h-8 flex items-center justify-center transition-all ${
                       active
                         ? 'bg-orange-500 text-white'
                         : 'text-zinc-400 hover:text-black hover:bg-zinc-50'
@@ -323,10 +323,10 @@ const DealsView = ({ onAddToCart, onToggleWishlist, wishlist, onProductClick }) 
               <button
                 key={label}
                 onClick={() => setActiveCategory(label)}
-                className={`flex-shrink-0 text-[9px] font-black uppercase tracking-[0.1em] px-3.5 py-1.5 rounded-sm border transition-all ${
+                className={`flex-shrink-0 text-[9px] font-black uppercase tracking-[0.1em] px-3.5 py-1.5  border transition-all ${
                   active
                     ? 'bg-black text-white border-black'
-                    : 'border-zinc-200 text-zinc-500 hover:border-zinc-400 hover:text-black'
+                    : 'border-zinc-400 text-zinc-500 hover:border-zinc-400 hover:text-black'
                 }`}
               >
                 {label}

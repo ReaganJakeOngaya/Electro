@@ -1,6 +1,7 @@
 // src/Pages/AdminDashboard.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import { getUser, getToken, logout } from '../Components/common/utils/auth';
 import { API } from '../Components/common/constants';
@@ -37,7 +38,7 @@ const AdminDashboard = () => {
       setUsers(usersRes.data);
       setStats(statsRes.data);
     } catch (err) {
-      console.error('Failed to load admin data', err);
+      toast.error('Failed to load admin data');
       if (err.response?.status === 401 || err.response?.status === 403) {
         logout();
         navigate('/login');
