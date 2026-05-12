@@ -1,4 +1,8 @@
-export const API = import.meta.env.VITE_API_URL || 'https://electro-nm31.onrender.com';
+// Use production URL by default, fall back to env var or localhost
+const API_URL = import.meta.env.VITE_API_URL || 'https://electro-nm31.onrender.com';
+export const API = API_URL;
+
+console.log('API URL:', API); // Debug log
 
 export const CATEGORIES = [
   { label: 'All',         icon: 'RiHomeLine' },
