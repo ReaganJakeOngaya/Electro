@@ -43,7 +43,7 @@ def product_to_dict(p):
 app = Flask(__name__)
 
 # CORS Configuration
-allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173').split(',')
+allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'https://deviceyangu.vercel.app').split(',')
 CORS(app, origins=allowed_origins, supports_credentials=True)
 
 bcrypt = Bcrypt(app)
